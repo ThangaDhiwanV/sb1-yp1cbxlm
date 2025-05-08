@@ -1,0 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    /* Use Tailwind's built-in transition utilities instead of custom ones */
+}
