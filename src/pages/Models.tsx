@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import ModelsGrid from '../components/ModelsGrid/ModelsGrid';
-import { getModelsByInstrumentId, getInstrumentById } from '../api/instrumentService';
+import { getInstrumentById } from '../api/instrumentService';
+import { getModelsByInstrumentId } from '../api/modelService';
 import { Model, Instrument } from '../types';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { debounce } from '../utils/debounce';
