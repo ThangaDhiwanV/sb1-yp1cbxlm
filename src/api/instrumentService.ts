@@ -116,3 +116,43 @@ export const getInstrumentById = async (id: string): Promise<Instrument | undefi
     throw error;
   }
 };
+
+export const getFileContent = async (fileId: string) => {
+  try {
+    if (config.mockApi) {
+      await delay(200);
+      return { content: "Mock file content" };
+    }
+
+    const response = await fetch(`${BASE_URL}/files/${fileId}`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch file content: ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching file:', error);
+    throw error;
+  }
+};
+
+export const saveFileContent = async (fileId: string, content: string): Promise<boolean> => {
+  try {
+    if (config.mockApi) {
+      await delay(200);
+      return true;
+    }
+
+    const response = await fetch(`${BASE_URL}/files/${fileId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ content }),
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error saving file:', error);
+    throw error;
+  }
+};
