@@ -20,7 +20,7 @@ const SideNav: React.FC = () => {
     return (
         <>
             <header className={cn(
-                "fixed top-0 left-0 right-0 h-14 z-30",
+                "fixed top-0 left-0 right-0 h-16 z-30",
                 "bg-white border-b border-gray-200",
                 "flex items-center justify-between px-6",
                 "bg-gradient-to-r from-white to-gray-50"
@@ -35,36 +35,39 @@ const SideNav: React.FC = () => {
                 <div className="flex items-center">
                     <button
                         className={cn(
-                            "flex items-center gap-2 px-4 py-2 rounded-lg",
+                            "flex items-center gap-3 px-5 py-2.5 rounded-lg",
                             "bg-gradient-to-r from-gray-50 to-gray-100",
-                            "border border-gray-200",
+                            "border border-gray-200/80",
                             "hover:from-gray-100 hover:to-gray-200",
-                            "transition-all duration-200",
-                            "group"
+                            "active:from-gray-200 active:to-gray-300",
+                            "transition-all duration-300",
+                            "group shadow-sm"
                         )}
                     >
                         <div className={cn(
-                            "w-8 h-8 rounded-full",
+                            "w-9 h-9 rounded-lg",
                             "bg-gradient-to-br from-primary-100 to-primary-200",
                             "flex items-center justify-center",
                             "group-hover:from-primary-200 group-hover:to-primary-300",
-                            "transition-all duration-200"
+                            "group-active:from-primary-300 group-active:to-primary-400",
+                            "transition-all duration-300",
+                            "shadow-inner"
                         )}>
-                            <User className="w-4 h-4 text-primary-600" />
+                            <User className="w-5 h-5 text-primary-600 group-hover:text-primary-700" />
                         </div>
-                        <span className="font-medium text-gray-700">{userName}</span>
+                        <span className="font-medium text-gray-700 group-hover:text-gray-900">{userName}</span>
                     </button>
                 </div>
             </header>
 
             <nav className={cn(
-                "w-16 fixed left-0 top-14 bottom-0 z-20",
+                "w-20 fixed left-0 top-16 bottom-0 z-20",
                 "bg-white border-r border-gray-200",
                 "flex flex-col items-center py-4",
                 "shadow-[1px_0_5px_0_rgba(0,0,0,0.05)]"
             )}>
                 <div className="flex-1 w-full">
-                    <ul className="space-y-2 px-2">
+                    <ul className="space-y-3 px-3">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             
@@ -74,7 +77,7 @@ const SideNav: React.FC = () => {
                                         <button
                                             onClick={() => navigate(item.path)}
                                             className={cn(
-                                                "w-full p-2.5 rounded-lg",
+                                                "w-full p-3 rounded-xl",
                                                 "transition-all duration-300",
                                                 "group relative",
                                                 "hover:bg-primary-50/80 hover:text-primary-600",
@@ -83,28 +86,18 @@ const SideNav: React.FC = () => {
                                                 isActive && cn(
                                                     "bg-primary-50 text-primary-600",
                                                     "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
-                                                    "before:w-0.5 before:h-5 before:bg-primary-500",
+                                                    "before:w-1 before:h-6 before:bg-primary-500",
                                                     "before:rounded-r-full"
                                                 )
                                             )}
                                         >
                                             <item.icon className={cn(
-                                                "w-5 h-5 mx-auto",
-                                                "transition-colors duration-300",
+                                                "w-7 h-7 mx-auto",
+                                                "transition-all duration-300",
                                                 isActive
-                                                    ? "text-primary-600"
-                                                    : "text-gray-500 group-hover:text-primary-500"
+                                                    ? "text-primary-600 transform scale-110"
+                                                    : "text-gray-500 group-hover:text-primary-500 group-hover:scale-110"
                                             )} />
-                                            <div className={cn(
-                                                "absolute left-full ml-2 px-2 py-1",
-                                                "bg-gray-900 text-white text-xs rounded",
-                                                "opacity-0 pointer-events-none",
-                                                "group-hover:opacity-100",
-                                                "transition-all duration-200",
-                                                "whitespace-nowrap z-20"
-                                            )}>
-                                                {item.label}
-                                            </div>
                                         </button>
                                     </Tooltip>
                                 </li>
