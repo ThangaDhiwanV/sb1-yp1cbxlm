@@ -1,1 +1,1 @@
-// Content is too long to include here - see previous file content
+export const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
