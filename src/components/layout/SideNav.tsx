@@ -15,7 +15,7 @@ const navItems = [
 const SideNav: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
-    const userName = "JOHN DOE"; // This would typically come from your auth context/state
+    const userName = "JOHN DOE";
 
     return (
         <>
@@ -35,27 +35,25 @@ const SideNav: React.FC = () => {
                 <div className="flex items-center">
                     <button
                         className={cn(
-                            "flex items-center gap-3 px-5 py-2.5 rounded-lg",
-                            "bg-gradient-to-r from-gray-50 to-gray-100",
+                            "flex items-center gap-3 px-4 py-2 rounded-xl",
+                            "bg-gradient-to-br from-white to-gray-50",
                             "border border-gray-200/80",
-                            "hover:from-gray-100 hover:to-gray-200",
-                            "active:from-gray-200 active:to-gray-300",
+                            "hover:border-primary-200 hover:bg-primary-50/50",
+                            "active:bg-primary-100/50",
                             "transition-all duration-300",
-                            "group shadow-sm"
+                            "group"
                         )}
                     >
                         <div className={cn(
-                            "w-9 h-9 rounded-lg",
-                            "bg-gradient-to-br from-primary-100 to-primary-200",
+                            "w-8 h-8 rounded-lg",
+                            "bg-gradient-to-br from-primary-500/10 to-primary-600/10",
                             "flex items-center justify-center",
-                            "group-hover:from-primary-200 group-hover:to-primary-300",
-                            "group-active:from-primary-300 group-active:to-primary-400",
-                            "transition-all duration-300",
-                            "shadow-inner"
+                            "group-hover:from-primary-500/20 group-hover:to-primary-600/20",
+                            "transition-all duration-300"
                         )}>
-                            <User className="w-5 h-5 text-primary-600 group-hover:text-primary-700" />
+                            <User className="w-5 h-5 text-primary-600" />
                         </div>
-                        <span className="font-medium text-gray-700 group-hover:text-gray-900">{userName}</span>
+                        <span className="font-medium text-gray-700">{userName}</span>
                     </button>
                 </div>
             </header>
@@ -63,11 +61,11 @@ const SideNav: React.FC = () => {
             <nav className={cn(
                 "w-20 fixed left-0 top-16 bottom-0 z-20",
                 "bg-white border-r border-gray-200",
-                "flex flex-col items-center py-4",
+                "flex flex-col items-center py-6",
                 "shadow-[1px_0_5px_0_rgba(0,0,0,0.05)]"
             )}>
                 <div className="flex-1 w-full">
-                    <ul className="space-y-3 px-3">
+                    <ul className="space-y-4 px-3">
                         {navItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             
@@ -77,22 +75,22 @@ const SideNav: React.FC = () => {
                                         <button
                                             onClick={() => navigate(item.path)}
                                             className={cn(
-                                                "w-full p-3 rounded-xl",
+                                                "w-full p-3.5 rounded-xl",
                                                 "transition-all duration-300",
                                                 "group relative",
-                                                "hover:bg-primary-50/80 hover:text-primary-600",
+                                                "hover:bg-primary-50/80",
                                                 "active:bg-primary-100/80",
                                                 "focus:outline-none focus:ring-2 focus:ring-primary-500/20",
                                                 isActive && cn(
-                                                    "bg-primary-50 text-primary-600",
+                                                    "bg-primary-50",
                                                     "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
-                                                    "before:w-1 before:h-6 before:bg-primary-500",
+                                                    "before:w-1 before:h-8 before:bg-primary-500",
                                                     "before:rounded-r-full"
                                                 )
                                             )}
                                         >
                                             <item.icon className={cn(
-                                                "w-7 h-7 mx-auto",
+                                                "w-8 h-8 mx-auto",
                                                 "transition-all duration-300",
                                                 isActive
                                                     ? "text-primary-600 transform scale-110"

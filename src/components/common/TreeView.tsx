@@ -53,10 +53,11 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
         <div>
             <div
                 className={cn(
-                    "flex items-center py-2 px-3 cursor-pointer rounded-lg mx-1.5 my-0.5",
+                    "flex items-center py-2.5 px-3 cursor-pointer rounded-lg mx-1.5 my-0.5",
                     "transition-all duration-200",
                     "hover:bg-primary-50/80",
                     isSelected && "bg-primary-50 shadow-sm border border-primary-100",
+                    "group"
                 )}
                 style={{ paddingLeft: `${depth * 12}px` }}
                 onClick={handleClick}
@@ -68,9 +69,10 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
                             onNodeToggle?.(node.id, !isExpanded);
                         }}
                         className={cn(
-                            "p-0.5 rounded-md mr-1.5 transition-colors",
+                            "p-1 rounded-md mr-1.5 transition-colors",
                             "hover:bg-primary-100/50",
-                            "active:bg-primary-200/50"
+                            "active:bg-primary-200/50",
+                            "group-hover:bg-white/80"
                         )}
                     >
                         {isExpanded ? (
@@ -84,19 +86,20 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
                 )}
                 {node.type === 'folder' ? (
                     <FolderOpen className={cn(
-                        "h-4 w-4 mr-2",
+                        "h-5 w-5 mr-2",
                         isSelected ? "text-primary-600" : "text-primary-500"
                     )} />
                 ) : (
                     <FileCode className={cn(
-                        "h-4 w-4 mr-2",
+                        "h-5 w-5 mr-2",
                         isSelected ? "text-primary-600" : "text-gray-500"
                     )} />
                 )}
                 <span className={cn(
                     "text-sm transition-colors",
                     isSelected ? "text-primary-900 font-medium" : "text-gray-700",
-                    node.error && "text-gray-400"
+                    node.error && "text-gray-400",
+                    "group-hover:text-primary-700"
                 )}>
                     {node.label}
                 </span>
@@ -106,7 +109,8 @@ const TreeNodeComponent: React.FC<TreeNodeProps> = ({
             </div>
             {isExpanded && node.children && (
                 <div className={cn(
-                    "transition-all duration-200",
+                    "transition-all duration-300",
+                    "pl-3 border-l border-gray-200/60 ml-3",
                     isExpanded ? "opacity-100" : "opacity-0"
                 )}>
                     {node.children.map((child) => (
@@ -135,7 +139,7 @@ export const TreeView: React.FC<TreeViewProps> = ({
 }) => {
     return (
         <div className={cn(
-            "overflow-y-auto rounded-lg",
+            "overflow-y-auto rounded-xl",
             "bg-white shadow-sm border border-gray-200",
             "p-2"
         )}>
