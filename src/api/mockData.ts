@@ -1,4 +1,4 @@
-import { Instrument, Model, HalApi } from '../types';
+import { Instrument, Model, HalApi, FileItem } from '../types';
 
 // Common content that can be reused
 export const abstractClassContent = `from abc import ABC, abstractmethod
@@ -54,6 +54,28 @@ export const mockInstruments: Instrument[] = [
     hasAbstractClass: true,
     hasApi: true,
     hasSoftPanel: false,
+    documentation: true,
+    hasDocs: true
+  },
+  {
+    id: '3',
+    name: 'Power Supply',
+    type: 'Power Supply',
+    driverCount: 3,
+    hasAbstractClass: true,
+    hasApi: true,
+    hasSoftPanel: true,
+    documentation: true,
+    hasDocs: true
+  },
+  {
+    id: '4',
+    name: 'Oscilloscope',
+    type: 'Oscilloscope',
+    driverCount: 2,
+    hasAbstractClass: true,
+    hasApi: true,
+    hasSoftPanel: true,
     documentation: true,
     hasDocs: true
   }
