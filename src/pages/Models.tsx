@@ -35,7 +35,6 @@ const Models: React.FC = () => {
                 setSelectedInstrument(instrument);
             }
 
-            // Apply search filter
             let filteredModels = [...modelData];
 
             if (searchQuery) {
@@ -45,7 +44,6 @@ const Models: React.FC = () => {
                 );
             }
 
-            // Pagination
             const pageSize = 9;
             const total = filteredModels.length;
             const totalPages = Math.ceil(total / pageSize);
@@ -77,7 +75,7 @@ const Models: React.FC = () => {
         { label: 'All Instruments', href: '/instruments' },
         {
             label: selectedInstrument
-                ? `${selectedInstrument.name} (${selectedInstrument.type})`
+                ? `${selectedInstrument.name} Models`
                 : 'Models'
         }
     ];

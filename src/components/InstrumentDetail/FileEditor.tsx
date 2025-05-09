@@ -40,50 +40,11 @@ const FileEditor: React.FC<FileEditorProps> = ({
           textContent = content;
         }
 
-        // Try to parse as JSON for structured content
         try {
           const parsed = JSON.parse(textContent);
           setParsedContent(parsed);
-
-          // Extract relevant content based on file type
-          switch (fileType) {
-            case 'hal':
-              setEditableContent(parsed.hal?.content || parsed.hal || textContent);
-              break;
-            case 'api':
-              setEditableContent(parsed.api?.content || parsed.api || textContent);
-              break;
-            case 'documentation':
-              setEditableContent(
-                parsed.documentation?.content ||
-                parsed.documentation ||
-                parsed.docs?.content ||
-                parsed.docs ||
-                textContent
-              );
-              break;
-            case 'manual':
-              setEditableContent(
-                parsed.manual?.content ||
-                parsed.manual ||
-                textContent
-              );
-              break;
-            case 'driver':
-              setEditableContent(
-                parsed.driver?.content ||
-                parsed.driver ||
-                textContent
-              );
-              break;
-            case 'panel':
-              setEditableContent(parsed.panel?.content || parsed.panel || textContent);
-              break;
-            default:
-              setEditableContent(textContent);
-          }
-        } catch (e) {
-          // If not JSON or parsing fails, use raw content
+          setEditableContent(parsed.content || textContent);
+        } catch {
           setEditableContent(textContent);
           setParsedContent(null);
         }
@@ -95,96 +56,29 @@ const FileEditor: React.FC<FileEditorProps> = ({
     };
 
     initializeContent();
-  }, [content, fileType]);
+  }, [content]);
 
   const handleSave = () => {
     if (!onSave) return;
-
-    if (fileType === 'driver') {
-      // For driver files, always wrap in JSON format
-      onSave(JSON.stringify({ driver: editableContent }, null, 2));
-    } else if (parsedContent) {
-      // Handle other parsed content types
-      const updatedContent = { ...parsedContent };
-      switch (fileType) {
-        case 'hal':
-          if (updatedContent.hal?.content) {
-            updatedContent.hal.content = editableContent;
-          } else {
-            updatedContent.hal = editableContent;
-          }
-          break;
-        case 'api':
-          if (updatedContent.api?.content) {
-            updatedContent.api.content = editableContent;
-          } else {
-            updatedContent.api = editableContent;
-          }
-          break;
-        case 'documentation':
-          // Update either 'documentation' or 'docs' property
-          if (updatedContent.documentation?.content) {
-            updatedContent.documentation.content = editableContent;
-          } else if (updatedContent.docs?.content) {
-            updatedContent.docs.content = editableContent;
-          } else if (updatedContent.documentation) {
-            updatedContent.documentation = editableContent;
-          } else {
-            updatedContent.docs = editableContent;
-          }
-          break;
-        case 'manual':
-          if (updatedContent.manual?.content) {
-            updatedContent.manual.content = editableContent;
-          } else {
-            updatedContent.manual = editableContent;
-          }
-          break;
-        case 'driver':
-          // Update either 'manual' or 'driver' property
-          if (updatedContent.driver?.content) {
-            updatedContent.driver.content = editableContent;
-          } else {
-            updatedContent.driver = editableContent;
-          }
-          break;
-        case 'panel':
-          if (updatedContent.panel?.content) {
-            updatedContent.panel.content = editableContent;
-          } else {
-            updatedContent.panel = editableContent;
-          }
-          break;
-      }
-      onSave(JSON.stringify(updatedContent, null, 2));
-    } else {
-      // If we didn't have parsed content, save the raw content
-      onSave(editableContent);
-    }
+    onSave(editableContent);
   };
 
-  // Determine file language for syntax highlighting
   const getLanguage = () => {
     if (fileName?.includes('.')) {
       const ext = fileName.split('.').pop()?.toLowerCase();
       switch (ext) {
-        case 'py':
-          return 'python';
-        case 'json':
-          return 'json';
-        case 'md':
-          return 'markdown';
-        default:
-          return ext;
+        case 'py': return 'python';
+        case 'json': return 'json';
+        case 'md': return 'markdown';
+        default: return ext;
       }
     }
 
-    // Determine by file type if no extension
     switch (fileType) {
       case 'hal':
       case 'driver':
       case 'api':
-        return 'python'; // Changed to always return python for these types
+        return 'python';
       case 'documentation':
       case 'manual':
         return 'markdown';
@@ -195,7 +89,6 @@ const FileEditor: React.FC<FileEditorProps> = ({
     }
   };
 
-  // Detect if content should be rendered as code
   const shouldRenderAsCode = () => {
     return (
       fileType === 'hal' ||
@@ -205,7 +98,6 @@ const FileEditor: React.FC<FileEditorProps> = ({
     );
   };
 
-  // Check if content should be rendered as markdown
   const shouldRenderAsMarkdown = () => {
     return (
       fileType === 'documentation' ||
@@ -213,9 +105,7 @@ const FileEditor: React.FC<FileEditorProps> = ({
     );
   };
 
-  // Helper to detect Python content
   const isPythonContent = (content: string): boolean => {
-    // Check for common Python indicators
     const pythonIndicators = [
       'class',
       'def',
@@ -247,55 +137,28 @@ const FileEditor: React.FC<FileEditorProps> = ({
 
   if (isEditing) {
     return (
-      <div className="h-full">
-        <textarea
-          className="w-full h-full p-4 font-mono text-sm border-0 focus:ring-0 resize-none"
-          value={editableContent}
-          onChange={(e) => setEditableContent(e.target.value)}
-        />
-        <div className="fixed bottom-4 right-4 flex gap-2">
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-auto">
+          <textarea
+            className="w-full h-full p-4 font-mono text-sm border-0 focus:ring-0 resize-none"
+            value={editableContent}
+            onChange={(e) => setEditableContent(e.target.value)}
+          />
+        </div>
+        <div className="flex justify-end gap-2 p-4 bg-white border-t">
           <button
-            className="px-4 py-2 bg-primary-500 text-white rounded hover:bg-primary-600"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-          <button
-            className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
             onClick={onCancel}
           >
             Cancel
           </button>
+          <button
+            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
+            onClick={handleSave}
+          >
+            Save
+          </button>
         </div>
-      </div>
-    );
-  }
-
-  // Update the render logic
-  if (fileType === 'driver') {
-    return (
-      <div className="p-4">
-        <SyntaxHighlighter
-          language="python"
-          style={materialDark}
-          customStyle={{ margin: 0 }}
-        >
-          {editableContent}
-        </SyntaxHighlighter>
-      </div>
-    );
-  }
-
-  if (fileType === 'api' && parsedContent) {
-    return (
-      <div className="p-4">
-        <SyntaxHighlighter
-          language="json"
-          style={materialDark}
-          customStyle={{ margin: 0 }}
-        >
-          {JSON.stringify(parsedContent, null, 2)}
-        </SyntaxHighlighter>
       </div>
     );
   }
@@ -330,7 +193,6 @@ const FileEditor: React.FC<FileEditorProps> = ({
     );
   }
 
-  // Default code view with syntax highlighting
   return (
     <div className="p-4">
       <SyntaxHighlighter
