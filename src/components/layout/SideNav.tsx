@@ -1,11 +1,11 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Database, Microscope, Boxes, Settings } from 'lucide-react';
+import { Home, Database, Microscope, Boxes, Settings } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
 
 const navItems = [
-    { id: 'project', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+    { id: 'project', label: 'Project', icon: Home, path: '/' },
     { id: 'macrobs', label: 'Macros', icon: Database, path: '/macrobs' },
     { id: 'vb', label: 'Virtual Bench', icon: Microscope, path: '/vb' },
     { id: 'instruments', label: 'Instruments', icon: Boxes, path: '/instruments' },
