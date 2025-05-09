@@ -3,67 +3,11 @@ import { delay } from '../utils/delay';
 
 const BASE_URL = config.apiBaseUrl;
 
-// Mock data for HAL API responses
-const mockHalData = {
-  techStacks: ['PyVISA', 'Serial', 'SCPI'],
-  halDocs: ['Multimeter', 'Oscilloscope', 'PowerSupply'],
-  mockGeneratedCode: (instrumentName: string) => ({
-    abstract_class: `from abc import ABC, abstractmethod
-
-class ${instrumentName}HAL(ABC):
-    """Base class for ${instrumentName} instruments."""
-
-    @abstractmethod
-    def initialize(self) -> bool:
-        """Initialize the instrument.
-        Returns:
-            bool: True if initialization successful, False otherwise
-        """
-        pass
-
-    @abstractmethod
-    def reset(self) -> None:
-        """Reset the instrument to default state."""
-        pass
-
-    @abstractmethod
-    def self_test(self) -> tuple[bool, str]:
-        """Run instrument self-test.
-        Returns:
-            tuple[bool, str]: (passed, message)
-        """
-        pass
-
-    @abstractmethod
-    def close(self) -> None:
-        """Close connection to instrument."""
-        pass`,
-    api: `class ${instrumentName}API:
-    def __init__(self):
-        self.hal = ${instrumentName}HAL()
-        self.initialized = False
-
-    def initialize(self) -> bool:
-        if not self.initialized:
-            self.initialized = self.hal.initialize()
-        return self.initialized
-
-    def reset(self) -> None:
-        if self.initialized:
-            self.hal.reset()
-
-    def close(self) -> None:
-        if self.initialized:
-            self.hal.close()
-            self.initialized = False`
-  })
-};
-
 // Get available technology stacks
 export const getTechStacks = async (): Promise<string[]> => {
   if (config.mockApi) {
     await delay(300);
-    return mockHalData.techStacks;
+    return ['PyVISA', 'Serial', 'SCPI'];
   }
 
   try {
@@ -83,7 +27,7 @@ export const getTechStacks = async (): Promise<string[]> => {
 export const getHalDocs = async (): Promise<string[]> => {
   if (config.mockApi) {
     await delay(300);
-    return mockHalData.halDocs;
+    return ['Multimeter', 'Oscilloscope', 'PowerSupply'];
   }
 
   try {
@@ -101,11 +45,6 @@ export const getHalDocs = async (): Promise<string[]> => {
 
 // Generate HAL implementation
 export const generateHal = async (instrumentName: string, stack: string) => {
-  if (config.mockApi) {
-    await delay(500);
-    return mockHalData.mockGeneratedCode(instrumentName);
-  }
-
   try {
     const response = await fetch(`${BASE_URL}/hal/create`, {
       method: 'POST',
@@ -131,11 +70,6 @@ export const generateHal = async (instrumentName: string, stack: string) => {
 
 // Add HAL to library
 export const addToLibrary = async (instrumentName: string, abstractClass: string) => {
-  if (config.mockApi) {
-    await delay(500);
-    return true;
-  }
-
   try {
     const response = await fetch(`${BASE_URL}/hal/library/${instrumentName}`, {
       method: 'POST',
@@ -156,12 +90,6 @@ export const addToLibrary = async (instrumentName: string, abstractClass: string
 
 // Download HAL
 export const downloadHal = async (instrumentName: string, abstractClass: string) => {
-  if (config.mockApi) {
-    await delay(300);
-    const content = `# HAL for ${instrumentName}\n\n${abstractClass}`;
-    return new Blob([content], { type: 'text/plain' });
-  }
-
   try {
     const response = await fetch(`${BASE_URL}/hal/download/${instrumentName}/hal`, {
       method: 'POST',
@@ -186,12 +114,6 @@ export const downloadHal = async (instrumentName: string, abstractClass: string)
 
 // Download API
 export const downloadApi = async (instrumentName: string, api: string) => {
-  if (config.mockApi) {
-    await delay(300);
-    const content = `# API for ${instrumentName}\n\n${api}`;
-    return new Blob([content], { type: 'text/plain' });
-  }
-
   try {
     const response = await fetch(`${BASE_URL}/hal/download/${instrumentName}/api`, {
       method: 'POST',
@@ -216,13 +138,6 @@ export const downloadApi = async (instrumentName: string, api: string) => {
 
 // Upload HAL
 export const uploadHal = async (file: File) => {
-  if (config.mockApi) {
-    await delay(500);
-    return {
-      HAL: [file.name]
-    };
-  }
-
   try {
     const formData = new FormData();
     formData.append('hal_file', file);
