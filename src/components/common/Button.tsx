@@ -25,13 +25,16 @@ const Button: React.FC<ButtonProps> = ({
   loading = false,
 }) => {
   const baseClasses = cn(
-    'inline-flex items-center justify-center font-medium relative',
-    'transition-all duration-300 ease-in-out transform',
+    'inline-flex items-center justify-center font-medium relative overflow-hidden',
+    'transition-all duration-300 ease-out transform',
     'focus:outline-none focus:ring-2 focus:ring-offset-2',
     'active:scale-95',
     'before:absolute before:inset-0 before:transition-transform before:duration-300',
     'before:origin-left before:scale-x-0 hover:before:scale-x-100',
     'before:bg-gradient-to-r before:opacity-10',
+    'after:absolute after:inset-0 after:transition-transform after:duration-500',
+    'after:origin-right after:scale-x-0 hover:after:scale-x-100',
+    'after:bg-gradient-to-l after:opacity-5',
     disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
     loading && 'cursor-wait'
   );
@@ -42,22 +45,27 @@ const Button: React.FC<ButtonProps> = ({
       'hover:from-primary-600 hover:to-primary-700',
       'focus:ring-primary-500',
       'before:from-white before:to-transparent',
+      'after:from-white/50 after:to-transparent',
       'shadow-md shadow-primary-500/10 hover:shadow-lg hover:shadow-primary-500/20',
-      'rounded-lg'
+      'rounded-lg',
+      'animate-bounce-in'
     ),
     secondary: cn(
       'bg-gradient-to-r from-secondary-500 to-secondary-600 text-white',
       'hover:from-secondary-600 hover:to-secondary-700',
       'focus:ring-secondary-500',
       'before:from-white before:to-transparent',
+      'after:from-white/50 after:to-transparent',
       'shadow-md shadow-secondary-500/10 hover:shadow-lg hover:shadow-secondary-500/20',
-      'rounded-lg'
+      'rounded-lg',
+      'animate-bounce-in'
     ),
     outline: cn(
       'border-2 border-gray-200 bg-white text-gray-700',
       'hover:border-primary-500/50 hover:text-primary-600',
       'focus:ring-primary-500',
       'before:from-primary-50 before:to-transparent',
+      'after:from-primary-100 after:to-transparent',
       'shadow-sm hover:shadow-md hover:shadow-primary-500/10',
       'rounded-lg'
     ),
@@ -66,6 +74,7 @@ const Button: React.FC<ButtonProps> = ({
       'hover:bg-gray-100',
       'focus:ring-gray-500',
       'before:from-primary-50 before:to-transparent',
+      'after:from-primary-100 after:to-transparent',
       'rounded-lg'
     ),
   };
@@ -97,12 +106,15 @@ const Button: React.FC<ButtonProps> = ({
     >
       {loading && loadingSpinner}
       <span className={cn(
-        'flex items-center gap-2',
+        'flex items-center gap-2 relative z-10',
+        'transition-transform duration-300 ease-out',
+        'hover:scale-105',
         loading && 'opacity-0'
       )}>
         {Icon && <Icon className={cn(
-          'h-4 w-4 transition-transform duration-300',
-          'group-hover:scale-110 group-hover:rotate-3'
+          'h-4 w-4 transition-all duration-300',
+          'group-hover:scale-110 group-hover:rotate-3',
+          'animate-bounce-in'
         )} />}
         {children}
       </span>
