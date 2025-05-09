@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import Button from './Button';
 import Card from './Card';
 import { cn } from '../../utils/cn';
+import LoadingOverlay from './LoadingOverlay';
 
 interface CreationSliderProps {
     isOpen: boolean;
@@ -13,17 +14,14 @@ interface CreationSliderProps {
 type TabType = 'hal' | 'driver';
 type PreviewType = 'document' | 'generated';
 
-// Instrument types
 type InstrumentType = 'DMM' | 'SMU' | 'Power Supply' | 'Oscilloscope';
 
-// Add interfaces for the collapsible sections
 interface Section {
     id: string;
     title: string;
     isExpanded: boolean;
 }
 
-// Enhanced driver data interface
 interface DriverData {
     technology: string;
     instrumentType: InstrumentType | '';
@@ -35,7 +33,6 @@ interface DriverData {
     abstractPreview: string | null;
 }
 
-// Separate interfaces for HAL and Driver data
 interface HalData {
     technology: string;
     document: string;
@@ -46,7 +43,6 @@ interface HalData {
     uploadedFile: File | null;
 }
 
-// Mock data constants
 const technologies = ['Python', 'TypeScript', 'C++', 'Java'];
 const documents = ['SCPI Manual', 'IVI Manual', 'Programming Guide', 'User Manual'] as const;
 const mockFunctions = [
@@ -60,10 +56,8 @@ const mockFunctions = [
     'calibrate()',
 ];
 
-// Add type for the document content mapping
 type DocumentType = typeof documents[number];
 
-// Type for the document content mapping
 type DocumentContent = Record<DocumentType, string>;
 
 const instrumentTypes: InstrumentType[] = ['DMM', 'SMU', 'Power Supply', 'Oscilloscope'];
@@ -100,6 +94,7 @@ const mockAbstractCode = {
 
 const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState<TabType>('hal');
+    const [isGenerating, setIsGenerating] = useState(false);
 
     const [halData, setHalData] = useState<HalData>({
         technology: '',
@@ -195,7 +190,6 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
                     isGenerated: false
                 }));
 
-                // Read and preview the file content
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     setHalData(prev => ({
@@ -212,7 +206,6 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
                     isGenerated: false
                 }));
 
-                // Read and preview the file content
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     setDriverData(prev => ({
@@ -249,7 +242,7 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
         );
     };
 
-    const handleGenerate = () => {
+    const handleGenerate = async () => {
         if (!canGenerate()) {
             toast.error(activeTab === 'hal'
                 ? 'Please select technology and either upload a file or select a document'
@@ -258,8 +251,13 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
             return;
         }
 
-        if (activeTab === 'hal') {
-            const generatedCode = `// Generated HAL content for ${halData.document || halData.uploadedFile?.name}
+        setIsGenerating(true);
+        
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            if (activeTab === 'hal') {
+                const generatedCode = `// Generated HAL content for ${halData.document || halData.uploadedFile?.name}
 // Technology: ${halData.technology}
 
 class ${halData.document.replace(/\s+/g, '')}HAL {
@@ -291,15 +289,14 @@ class ${halData.document.replace(/\s+/g, '')}HAL {
     }` : ''}
 }`;
 
-            setHalData(prev => ({
-                ...prev,
-                isGenerated: true,
-                generatedPreview: generatedCode,
-                previewType: 'generated'
-            }));
-
-        } else {
-            const preview = `// Generated Driver for ${driverData.file?.name}
+                setHalData(prev => ({
+                    ...prev,
+                    isGenerated: true,
+                    generatedPreview: generatedCode,
+                    previewType: 'generated'
+                }));
+            } else {
+                const preview = `// Generated Driver for ${driverData.file?.name}
 // Technology: ${driverData.technology}
 // Selected Functions:
 ${driverData.functions.map(f => `// - ${f}`).join('\n')}
@@ -311,14 +308,19 @@ class InstrumentDriver {
 
     ${driverData.functions.join('\n\n    ')}
 }`;
-            setDriverData(prev => ({
-                ...prev,
-                isGenerated: true,
-                previewContent: preview
-            }));
-        }
+                setDriverData(prev => ({
+                    ...prev,
+                    isGenerated: true,
+                    previewContent: preview
+                }));
+            }
 
-        toast.success(`Generating ${activeTab === 'hal' ? 'HAL' : 'Driver'} for ${activeTab === 'hal' ? halData.technology : driverData.technology}...`);
+            toast.success(`${activeTab === 'hal' ? 'HAL' : 'Driver'} generated successfully!`);
+        } catch (error) {
+            toast.error('Failed to generate code');
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     const handleTabChange = (tab: TabType) => {
@@ -365,42 +367,68 @@ class InstrumentDriver {
 
     return (
         <div
-            className={`fixed inset-y-0 right-0 w-[800px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex ${isOpen ? 'translate-x-0' : 'translate-x-full'
-                }`}
+            className={cn(
+                'fixed inset-y-0 right-0 w-[800px] bg-white shadow-2xl',
+                'transform transition-all duration-500 ease-out z-50',
+                'border-l border-gray-200',
+                isOpen ? 'translate-x-0' : 'translate-x-full'
+            )}
         >
-            <div className="flex-1 flex flex-col min-w-0">
-                <div className="flex items-center justify-between p-4 border-b">
-                    <h2 className="text-xl font-semibold">
+            <div className="flex-1 flex flex-col h-full relative">
+                {isGenerating && (
+                    <LoadingOverlay message="Generating code..." />
+                )}
+
+                <div className={cn(
+                    'flex items-center justify-between p-4',
+                    'border-b border-gray-200',
+                    'bg-gradient-to-r from-white to-gray-50'
+                )}>
+                    <h2 className={cn(
+                        'text-xl font-semibold',
+                        'bg-gradient-to-r from-gray-900 to-gray-600',
+                        'bg-clip-text text-transparent'
+                    )}>
                         {activeTab === 'hal' ? 'HAL Creation' : 'Driver Creation'}
                     </h2>
                     <button
                         onClick={onClose}
-                        className="p-2 hover:bg-gray-100 rounded-full"
+                        className={cn(
+                            'p-2 rounded-full',
+                            'hover:bg-gray-100',
+                            'transition-colors duration-200',
+                            'group'
+                        )}
                         aria-label="Close"
                     >
-                        <X size={24} />
+                        <X className="h-5 w-5 text-gray-500 group-hover:text-gray-700 transition-colors" />
                     </button>
                 </div>
 
                 <div className="flex border-b">
-                    <button
-                        className={`flex-1 py-3 text-center font-medium ${activeTab === 'hal'
-                            ? 'text-primary-600 border-b-2 border-primary-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                        onClick={() => handleTabChange('hal')}
-                    >
-                        HAL Creation
-                    </button>
-                    <button
-                        className={`flex-1 py-3 text-center font-medium ${activeTab === 'driver'
-                            ? 'text-primary-600 border-b-2 border-primary-600'
-                            : 'text-gray-500 hover:text-gray-700'
-                            }`}
-                        onClick={() => handleTabChange('driver')}
-                    >
-                        Driver Creation
-                    </button>
+                    {['hal', 'driver'].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => handleTabChange(tab as TabType)}
+                            className={cn(
+                                'flex-1 py-3 px-4',
+                                'text-center font-medium',
+                                'transition-all duration-300',
+                                'relative',
+                                activeTab === tab ? [
+                                    'text-primary-600',
+                                    'before:absolute before:bottom-0 before:left-0 before:right-0',
+                                    'before:h-0.5 before:bg-primary-600',
+                                    'before:animate-slide-in-from-left'
+                                ] : [
+                                    'text-gray-500 hover:text-gray-700',
+                                    'hover:bg-gray-50'
+                                ]
+                            )}
+                        >
+                            {tab === 'hal' ? 'HAL Creation' : 'Driver Creation'}
+                        </button>
+                    ))}
                 </div>
 
                 <div className="flex-1 overflow-y-auto">

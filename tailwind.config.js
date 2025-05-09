@@ -5,42 +5,7 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      colors: {
-        ...theme.colors,
-        // Add alpha colors utility
-        alpha: {
-          white: {
-            5: 'rgb(255 255 255 / 0.05)',
-            10: 'rgb(255 255 255 / 0.1)',
-            20: 'rgb(255 255 255 / 0.2)',
-            30: 'rgb(255 255 255 / 0.3)',
-            40: 'rgb(255 255 255 / 0.4)',
-            50: 'rgb(255 255 255 / 0.5)',
-            60: 'rgb(255 255 255 / 0.6)',
-            70: 'rgb(255 255 255 / 0.7)',
-            80: 'rgb(255 255 255 / 0.8)',
-            90: 'rgb(255 255 255 / 0.9)',
-          },
-          gray: {
-            2: 'rgb(0 0 0 / 0.02)',
-            5: 'rgb(0 0 0 / 0.05)',
-            10: 'rgb(0 0 0 / 0.1)',
-            20: 'rgb(0 0 0 / 0.2)',
-            30: 'rgb(0 0 0 / 0.3)',
-            40: 'rgb(0 0 0 / 0.4)',
-            50: 'rgb(0 0 0 / 0.5)',
-            60: 'rgb(0 0 0 / 0.6)',
-            70: 'rgb(0 0 0 / 0.7)',
-            80: 'rgb(0 0 0 / 0.8)',
-            90: 'rgb(0 0 0 / 0.9)',
-          },
-          accent: {
-            10: 'rgb(var(--accent-rgb) / 0.1)',
-            20: 'rgb(var(--accent-rgb) / 0.2)',
-            30: 'rgb(var(--accent-rgb) / 0.3)',
-          },
-        }
-      },
+      colors: theme.colors,
       fontFamily: theme.typography.fontFamily,
       fontSize: theme.typography.fontSize,
       fontWeight: theme.typography.fontWeight,
@@ -53,6 +18,12 @@ export default {
         'fade-out': 'fade-out 0.5s ease-out',
         'slide-up': 'slide-up 0.3s ease-out',
         'slide-down': 'slide-down 0.3s ease-out',
+        'slide-in-from-right': 'slide-in-from-right 0.5s ease-out',
+        'slide-out-to-right': 'slide-out-to-right 0.5s ease-out',
+        'slide-in-from-left': 'slide-in-from-left 0.3s ease-out',
+        'scale-in': 'scale-in 0.2s ease-out',
+        'rotate-180': 'rotate-180 0.3s ease-out',
+        'bounce-in': 'bounce-in 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
       },
       keyframes: {
         'fade-in': {
@@ -70,6 +41,32 @@ export default {
         'slide-down': {
           '0%': { transform: 'translateY(-10px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+        'slide-in-from-right': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(0)' },
+        },
+        'slide-out-to-right': {
+          '0%': { transform: 'translateX(0)' },
+          '100%': { transform: 'translateX(100%)' },
+        },
+        'slide-in-from-left': {
+          '0%': { transform: 'scaleX(0)', transformOrigin: 'left' },
+          '100%': { transform: 'scaleX(1)', transformOrigin: 'left' },
+        },
+        'scale-in': {
+          '0%': { transform: 'scale(0.95)', opacity: '0' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
+        },
+        'rotate-180': {
+          '0%': { transform: 'rotate(0deg)' },
+          '100%': { transform: 'rotate(180deg)' },
+        },
+        'bounce-in': {
+          '0%': { transform: 'scale(0.3)', opacity: '0' },
+          '50%': { transform: 'scale(1.05)', opacity: '0.8' },
+          '70%': { transform: 'scale(0.9)', opacity: '0.9' },
+          '100%': { transform: 'scale(1)', opacity: '1' },
         },
       },
     },
