@@ -3,7 +3,7 @@ import { cn } from '../../utils/cn';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
   size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
   className?: string;
@@ -49,17 +49,6 @@ const Button: React.FC<ButtonProps> = ({
       'hover:bg-gray-100 focus:ring-gray-500',
       'shadow-none'
     ),
-    gradient: cn(
-      'relative overflow-hidden',
-      'bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500',
-      'bg-[length:200%_100%]',
-      'animate-gradient',
-      'text-white font-medium',
-      'shadow-lg shadow-primary-500/20',
-      'border border-white/20',
-      'hover:scale-[1.02] active:scale-[0.98]',
-      'group'
-    ),
   };
 
   const sizeClasses = {
@@ -81,43 +70,8 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      {Icon && (
-        <Icon 
-          className={cn(
-            "h-4 w-4 transition-transform duration-300",
-            variant === 'gradient' && "group-hover:rotate-12 group-hover:scale-110"
-          )} 
-        />
-      )}
-      <span className="relative">
-        {children}
-        {variant === 'gradient' && (
-          <span className={cn(
-            "absolute inset-x-0 bottom-0 h-0.5",
-            "bg-white/40 scale-x-0 group-hover:scale-x-100",
-            "transition-transform duration-300 origin-left"
-          )} />
-        )}
-      </span>
-      {variant === 'gradient' && (
-        <>
-          <div className={cn(
-            "absolute inset-0 -z-10",
-            "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))]",
-            "from-white/20 via-transparent to-transparent",
-            "opacity-0 group-hover:opacity-100",
-            "transition-opacity duration-300",
-            "pointer-events-none"
-          )} />
-          <div className={cn(
-            "absolute inset-0",
-            "bg-gradient-to-r from-transparent via-white/20 to-transparent",
-            "translate-x-[-100%] group-hover:translate-x-[100%]",
-            "transition-transform duration-1000",
-            "pointer-events-none"
-          )} />
-        </>
-      )}
+      {Icon && <Icon className="h-4 w-4" />}
+      {children}
     </button>
   );
 };

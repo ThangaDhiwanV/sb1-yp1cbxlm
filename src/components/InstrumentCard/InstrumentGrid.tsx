@@ -1,7 +1,7 @@
 import React from 'react';
 import InstrumentCard from './InstrumentCard';
 import { Instrument } from '../../types';
-import { Filter, ChevronLeft, ChevronRight, Search, Sparkles } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 import Button from '../common/Button';
 import { cn } from '../../utils/cn';
 

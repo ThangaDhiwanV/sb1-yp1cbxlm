@@ -3,7 +3,9 @@ import InstrumentGrid from '../components/InstrumentCard/InstrumentGrid';
 import { getInstruments } from '../api/instrumentService';
 import { Instrument } from '../types';
 import { debounce } from '../utils/debounce';
-import { cn } from '../utils/cn';
+import { Wrench } from 'lucide-react';
+import Button from '../components/common/Button';
+import { useCreationContext } from '../App';
 import { toast } from 'sonner';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 
@@ -17,6 +19,7 @@ const Instruments: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<string | undefined>();
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const { setIsCreationSliderOpen } = useCreationContext();
 
     const fetchInstruments = useCallback(async () => {
         try {
@@ -68,7 +71,16 @@ const Instruments: React.FC = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
-                <Breadcrumbs items={breadcrumbItems} />
+                <div className="flex justify-between items-center">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <Button
+                        onClick={() => setIsCreationSliderOpen(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Wrench className="h-4 w-4" />
+                        Create HAL/Driver
+                    </Button>
+                </div>
             </div>
 
             {error ? (
