@@ -13,14 +13,17 @@ interface CreationSliderProps {
 type TabType = 'hal' | 'driver';
 type PreviewType = 'document' | 'generated';
 
+// Instrument types
 type InstrumentType = 'DMM' | 'SMU' | 'Power Supply' | 'Oscilloscope';
 
+// Add interfaces for the collapsible sections
 interface Section {
     id: string;
     title: string;
     isExpanded: boolean;
 }
 
+// Enhanced driver data interface
 interface DriverData {
     technology: string;
     instrumentType: InstrumentType | '';
@@ -32,6 +35,7 @@ interface DriverData {
     abstractPreview: string | null;
 }
 
+// Separate interfaces for HAL and Driver data
 interface HalData {
     technology: string;
     document: string;
@@ -42,6 +46,7 @@ interface HalData {
     uploadedFile: File | null;
 }
 
+// Mock data constants
 const technologies = ['Python', 'TypeScript', 'C++', 'Java'];
 const documents = ['SCPI Manual', 'IVI Manual', 'Programming Guide', 'User Manual'] as const;
 const mockFunctions = [
@@ -55,7 +60,10 @@ const mockFunctions = [
     'calibrate()',
 ];
 
+// Add type for the document content mapping
 type DocumentType = typeof documents[number];
+
+// Type for the document content mapping
 type DocumentContent = Record<DocumentType, string>;
 
 const instrumentTypes: InstrumentType[] = ['DMM', 'SMU', 'Power Supply', 'Oscilloscope'];
@@ -92,8 +100,6 @@ const mockAbstractCode = {
 
 const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState<TabType>('hal');
-    const [isLoading, setIsLoading] = useState(false);
-    const [loadingMessage, setLoadingMessage] = useState('');
 
     const [halData, setHalData] = useState<HalData>({
         technology: '',
@@ -178,55 +184,43 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
    - Troubleshooting`
     };
 
-    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            try {
-                setIsLoading(true);
-                
-                if (activeTab === 'hal') {
-                    const response = await uploadHal(file);
-                    if (response) {
-                        setHalData(prev => ({
-                            ...prev,
-                            uploadedFile: file,
-                            documentPreview: null,
-                            isGenerated: false
-                        }));
+            if (activeTab === 'hal') {
+                setHalData(prev => ({
+                    ...prev,
+                    uploadedFile: file,
+                    documentPreview: null,
+                    isGenerated: false
+                }));
 
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            setHalData(prev => ({
-                                ...prev,
-                                documentPreview: e.target?.result as string
-                            }));
-                        };
-                        reader.readAsText(file);
+                // Read and preview the file content
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setHalData(prev => ({
+                        ...prev,
+                        documentPreview: e.target?.result as string
+                    }));
+                };
+                reader.readAsText(file);
+            } else {
+                setDriverData(prev => ({
+                    ...prev,
+                    file,
+                    previewContent: null,
+                    isGenerated: false
+                }));
 
-                        toast.success('File uploaded successfully');
-                    }
-                } else {
+                // Read and preview the file content
+                const reader = new FileReader();
+                reader.onload = (e) => {
                     setDriverData(prev => ({
                         ...prev,
-                        file,
-                        previewContent: null,
-                        isGenerated: false
+                        previewContent: e.target?.result as string
                     }));
-
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        setDriverData(prev => ({
-                            ...prev,
-                            previewContent: e.target?.result as string
-                        }));
-                    };
-                    reader.readAsText(file);
-                }
-            } catch (error) {
-                console.error('Error uploading file:', error);
-                toast.error('Failed to upload file');
-            } finally {
-                setIsLoading(false);
+                };
+                reader.readAsText(file);
             }
         }
     };
@@ -255,7 +249,7 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
         );
     };
 
-    const handleGenerate = async () => {
+    const handleGenerate = () => {
         if (!canGenerate()) {
             toast.error(activeTab === 'hal'
                 ? 'Please select technology and either upload a file or select a document'
@@ -264,26 +258,48 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
             return;
         }
 
-        try {
-            setIsLoading(true);
-            setLoadingMessage('Generating implementation...');
+        if (activeTab === 'hal') {
+            const generatedCode = `// Generated HAL content for ${halData.document || halData.uploadedFile?.name}
+// Technology: ${halData.technology}
 
-            if (activeTab === 'hal') {
-                const response = await generateHal(
-                    halData.document || halData.uploadedFile?.name || 'Unknown',
-                    halData.technology
-                );
+class ${halData.document.replace(/\s+/g, '')}HAL {
+    constructor() {
+        this.initialized = false;
+    }
 
-                setHalData(prev => ({
-                    ...prev,
-                    isGenerated: true,
-                    generatedPreview: response.abstract_class,
-                    previewType: 'generated'
-                }));
+    initialize() {
+        this.initialized = true;
+        return true;
+    }
 
-                toast.success('HAL implementation generated successfully');
-            } else {
-                const preview = `// Generated Driver for ${driverData.file?.name}
+    // Methods generated from ${halData.document}:
+    ${halData.document.includes('SCPI') ? `
+    async measureVoltage() {
+        return this.query('MEAS:VOLT?');
+    }
+
+    async measureCurrent() {
+        return this.query('MEAS:CURR?');
+    }` : ''}
+    ${halData.document.includes('IVI') ? `
+    async configure(parameter: string, value: number) {
+        return this.write(\`CONF:\${parameter} \${value}\`);
+    }
+
+    async measure(parameter: string) {
+        return this.query(\`MEAS:\${parameter}?\`);
+    }` : ''}
+}`;
+
+            setHalData(prev => ({
+                ...prev,
+                isGenerated: true,
+                generatedPreview: generatedCode,
+                previewType: 'generated'
+            }));
+
+        } else {
+            const preview = `// Generated Driver for ${driverData.file?.name}
 // Technology: ${driverData.technology}
 // Selected Functions:
 ${driverData.functions.map(f => `// - ${f}`).join('\n')}
@@ -295,22 +311,14 @@ class InstrumentDriver {
 
     ${driverData.functions.join('\n\n    ')}
 }`;
-
-                setDriverData(prev => ({
-                    ...prev,
-                    isGenerated: true,
-                    previewContent: preview
-                }));
-
-                toast.success('Driver implementation generated successfully');
-            }
-        } catch (error) {
-            console.error('Error generating implementation:', error);
-            toast.error(`Failed to generate ${activeTab === 'hal' ? 'HAL' : 'Driver'} implementation`);
-        } finally {
-            setIsLoading(false);
-            setLoadingMessage('');
+            setDriverData(prev => ({
+                ...prev,
+                isGenerated: true,
+                previewContent: preview
+            }));
         }
+
+        toast.success(`Generating ${activeTab === 'hal' ? 'HAL' : 'Driver'} for ${activeTab === 'hal' ? halData.technology : driverData.technology}...`);
     };
 
     const handleTabChange = (tab: TabType) => {
@@ -356,8 +364,10 @@ class InstrumentDriver {
     };
 
     return (
-        <div className={`fixed inset-y-0 right-0 w-[800px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex relative ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
-            {isLoading && <LoadingOverlay message={loadingMessage} />}
+        <div
+            className={`fixed inset-y-0 right-0 w-[800px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex ${isOpen ? 'translate-x-0' : 'translate-x-full'
+                }`}
+        >
             <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-xl font-semibold">
