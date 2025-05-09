@@ -34,7 +34,7 @@ class Abstract_Class(ABC):
         """Close connection to instrument."""
         pass`;
 
-export const instruments: Instrument[] = [
+export const mockInstruments: Instrument[] = [
   {
     id: '1',
     name: 'SMU',
@@ -81,7 +81,7 @@ export const instruments: Instrument[] = [
   }
 ];
 
-export const models: Model[] = [
+export const mockModels: Model[] = [
   {
     id: 'm1',
     name: 'Keithley2500',
@@ -188,66 +188,3 @@ export const mockHalApi: HalApi[] = [
     ]
   }
 ];
-
-// Mock HAL technology stacks
-export const mockTechStacks = ['PyVISA', 'Serial', 'SCPI'];
-
-// Mock HAL documents
-export const mockHalDocs = ['Multimeter', 'Oscilloscope', 'PowerSupply'];
-
-// Mock document content
-export const mockDocumentContent = {
-  'SCPI Manual': `SCPI Command Reference Manual
---------------------------------
-
-1. Initialization Commands
-   - *RST: Reset device to default state
-   - *CLS: Clear status registers
-
-2. Measurement Commands
-   - MEASure:VOLTage?
-   - MEASure:CURRent?
-
-3. Configuration Commands
-   - CONFigure:VOLTage
-   - CONFigure:CURRent`,
-
-  'IVI Manual': `IVI Driver Manual
----------------
-
-1. Driver Overview
-   - Initialization
-   - Error handling
-   - Resource management
-
-2. API Reference
-   - Initialize()
-   - Configure()
-   - Measure()`,
-
-  'Programming Guide': `Instrument Programming Guide
--------------------------
-
-1. Getting Started
-   - Device connection
-   - Basic measurements
-   - Error handling
-
-2. Advanced Features
-   - Triggering
-   - Data logging
-   - System integration`,
-
-  'User Manual': `Instrument User Manual
--------------------
-
-1. Installation
-   - Hardware setup
-   - Software installation
-   - Initial configuration
-
-2. Operation
-   - Basic measurements
-   - Advanced features
-   - Troubleshooting`
-};
