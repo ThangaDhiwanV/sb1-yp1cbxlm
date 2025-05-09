@@ -4,9 +4,6 @@ import { getInstruments } from '../api/instrumentService';
 import { Instrument } from '../types';
 import { debounce } from '../utils/debounce';
 import { cn } from '../utils/cn';
-import { Sparkles } from 'lucide-react';
-import Button from '../components/common/Button';
-import { useCreationContext } from '../App';
 import { toast } from 'sonner';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 
@@ -20,7 +17,6 @@ const Instruments: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<string | undefined>();
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-    const { setIsCreationSliderOpen } = useCreationContext();
 
     const fetchInstruments = useCallback(async () => {
         try {
@@ -72,35 +68,7 @@ const Instruments: React.FC = () => {
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
-                <div className="flex justify-between items-center">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <Button
-                        onClick={() => setIsCreationSliderOpen(true)}
-                        className={cn(
-                            "relative group overflow-hidden",
-                            "bg-gradient-to-r from-primary-500 to-secondary-500",
-                            "hover:from-primary-600 hover:to-secondary-600",
-                            "text-white font-medium",
-                            "px-6 py-2.5 rounded-xl",
-                            "shadow-lg shadow-primary-500/20",
-                            "transition-all duration-300",
-                            "border border-white/20",
-                            "hover:scale-[1.02]",
-                            "active:scale-[0.98]"
-                        )}
-                    >
-                        <span className="flex items-center gap-2">
-                            <Sparkles className="h-5 w-5" />
-                            <span>Create HAL/Driver</span>
-                        </span>
-                        <div className={cn(
-                            "absolute inset-0",
-                            "bg-gradient-to-r from-transparent via-white/20 to-transparent",
-                            "translate-x-[-100%] group-hover:translate-x-[100%]",
-                            "transition-transform duration-1000"
-                        )} />
-                    </Button>
-                </div>
+                <Breadcrumbs items={breadcrumbItems} />
             </div>
 
             {error ? (
