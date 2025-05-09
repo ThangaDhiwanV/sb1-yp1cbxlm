@@ -3,6 +3,7 @@ import InstrumentGrid from '../components/InstrumentCard/InstrumentGrid';
 import { getInstruments } from '../api/instrumentService';
 import { Instrument } from '../types';
 import { debounce } from '../utils/debounce';
+import { cn } from '../utils/cn';
 import { Sparkles } from 'lucide-react';
 import Button from '../components/common/Button';
 import { useCreationContext } from '../App';
