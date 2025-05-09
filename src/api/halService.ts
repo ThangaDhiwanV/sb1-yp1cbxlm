@@ -7,15 +7,16 @@ const BASE_URL = config.apiBaseUrl;
 export const getTechStacks = async (): Promise<string[]> => {
   if (config.mockApi) {
     await delay(300);
-    return ['Python', 'TypeScript', 'C++', 'Java'];
+    return ['PyVISA', 'Serial', 'SCPI'];
   }
 
   try {
-    const response = await fetch(`${BASE_URL}/hal/tech_stack`);
+    const response = await fetch(`${BASE_URL}/hal/tech_stack/`);
     if (!response.ok) {
       throw new Error('Failed to fetch technology stacks');
     }
-    return await response.json();
+    const data = await response.json();
+    return data.types;
   } catch (error) {
     console.error('Error fetching tech stacks:', error);
     throw error;
@@ -26,7 +27,7 @@ export const getTechStacks = async (): Promise<string[]> => {
 export const getHalDocs = async (): Promise<string[]> => {
   if (config.mockApi) {
     await delay(300);
-    return ['SCPI Manual', 'IVI Manual', 'Programming Guide', 'User Manual'];
+    return ['Multimeter', 'Oscilloscope', 'PowerSupply'];
   }
 
   try {
@@ -34,7 +35,8 @@ export const getHalDocs = async (): Promise<string[]> => {
     if (!response.ok) {
       throw new Error('Failed to fetch HAL documents');
     }
-    return await response.json();
+    const data = await response.json();
+    return data.HAL;
   } catch (error) {
     console.error('Error fetching HAL docs:', error);
     throw error;
@@ -46,8 +48,8 @@ export const generateHal = async (instrumentName: string, stack: string) => {
   if (config.mockApi) {
     await delay(500);
     return {
-      abstract_class: `// Generated HAL for ${instrumentName}\nclass ${instrumentName}HAL {\n  // Implementation\n}`,
-      api: `// Generated API for ${instrumentName}\nclass ${instrumentName}API {\n  // Implementation\n}`
+      abstract_class: `# Generated HAL for ${instrumentName}\nclass ${instrumentName}HAL:\n    def __init__(self):\n        self.initialized = False\n\n    def initialize(self) -> bool:\n        self.initialized = True\n        return True`,
+      api: `# Generated API for ${instrumentName}\nclass ${instrumentName}API:\n    def __init__(self):\n        self.hal = ${instrumentName}HAL()\n\n    def initialize(self) -> bool:\n        return self.hal.initialize()`
     };
   }
 
@@ -75,7 +77,7 @@ export const generateHal = async (instrumentName: string, stack: string) => {
 };
 
 // Add HAL to library
-export const addToLibrary = async (instrumentName: string, abstractClass: string, api: string) => {
+export const addToLibrary = async (instrumentName: string, abstractClass: string) => {
   if (config.mockApi) {
     await delay(500);
     return true;
@@ -88,8 +90,7 @@ export const addToLibrary = async (instrumentName: string, abstractClass: string
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        abstract_class: abstractClass,
-        api
+        abstract_class: abstractClass
       })
     });
 
@@ -104,7 +105,8 @@ export const addToLibrary = async (instrumentName: string, abstractClass: string
 export const downloadHal = async (instrumentName: string, abstractClass: string) => {
   if (config.mockApi) {
     await delay(300);
-    return new Blob([abstractClass], { type: 'text/plain' });
+    const content = `# HAL for ${instrumentName}\n\n${abstractClass}`;
+    return new Blob([content], { type: 'text/plain' });
   }
 
   try {
@@ -133,7 +135,8 @@ export const downloadHal = async (instrumentName: string, abstractClass: string)
 export const downloadApi = async (instrumentName: string, api: string) => {
   if (config.mockApi) {
     await delay(300);
-    return new Blob([api], { type: 'text/plain' });
+    const content = `# API for ${instrumentName}\n\n${api}`;
+    return new Blob([content], { type: 'text/plain' });
   }
 
   try {
@@ -162,7 +165,9 @@ export const downloadApi = async (instrumentName: string, api: string) => {
 export const uploadHal = async (file: File) => {
   if (config.mockApi) {
     await delay(500);
-    return true;
+    return {
+      HAL: [file.name]
+    };
   }
 
   try {
@@ -174,7 +179,11 @@ export const uploadHal = async (file: File) => {
       body: formData
     });
 
-    return response.ok;
+    if (!response.ok) {
+      throw new Error('Failed to upload HAL');
+    }
+
+    return await response.json();
   } catch (error) {
     console.error('Error uploading HAL:', error);
     throw error;
