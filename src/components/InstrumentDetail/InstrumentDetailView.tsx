@@ -1,142 +1,94 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FileSearch } from 'lucide-react';
 import FileEditor from './FileEditor';
-import TreeNav from '../InstrumentDetail/TreeNav';
-import { Instrument, TabType, Model, HalApi, FileItem } from '../../types';
-import {
-  getHalApiByInstrumentId,
-  getModelsByInstrumentId,
-  getFileContent,
-  saveFileContent,
-  downloadFile
-} from '../../api/instrumentService';
-import { useNavigate } from 'react-router-dom';
+import TreeNav from './TreeNav';
+import { Instrument, Model, HalApi, FileItem, ExplorerResponse } from '../../types';
 import { toast } from 'sonner';
+import ErrorBoundary from '../common/ErrorBoundary';
+import { getModelsByInstrumentId, getHalApiByInstrumentId, getFileContent } from '../../api/instrumentService';
 
 interface InstrumentDetailViewProps {
-  instrument: Instrument;
+  instrument?: Instrument | null;
   initialFileId?: string;
-  initialFileType?: string;
+  allInstruments: Instrument[];
+  explorerData?: ExplorerResponse;
 }
 
 const InstrumentDetailView: React.FC<InstrumentDetailViewProps> = ({
   instrument,
   initialFileId,
-  initialFileType
+  allInstruments,
+  explorerData
 }) => {
-  const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState<TabType>(
-    initialFileType?.includes('hal') || initialFileType === 'api' ? 'hal-api' : 'models'
-  );
-  const [halApi, setHalApi] = useState<HalApi | null>(null);
-  const [models, setModels] = useState<Model[]>([]);
+  const [halApiData, setHalApiData] = useState<HalApi[]>([]);
+  const [modelsData, setModelsData] = useState<Model[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fileLoading, setFileLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileItem | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [expandedModelId, setExpandedModelId] = useState<string | null>(null);
+  const [expandedNodes, setExpandedNodes] = useState({
+    instrumentId: instrument?.id || null,
+    modelId: null as string | null,
+    expandedModels: [] as string[]
+  });
 
-  // Memoize data fetching to prevent unnecessary API calls
-  const fetchData = useMemo(() => {
-    return async () => {
+  useEffect(() => {
+    const loadData = async () => {
+      if (!instrument?.id) return;
       try {
         setLoading(true);
-        const [halApiData, modelsData] = await Promise.all([
-          getHalApiByInstrumentId(instrument.id),
-          getModelsByInstrumentId(instrument.id)
-        ]);
 
-        setHalApi(halApiData || null);
-        setModels(modelsData);
+        // Load HAL API data
+        const halApi = await getHalApiByInstrumentId(instrument.id);
+        if (halApi) {
+          setHalApiData([halApi]);
+        }
 
+        // Load models data
+        const models = await getModelsByInstrumentId(instrument.id);
+        setModelsData(models);
+
+        // If initialFileId is provided, expand necessary nodes
         if (initialFileId) {
-          let file: FileItem | undefined;
-
-          // Look in HAL API files first
-          if (halApiData) {
-            file = halApiData.files.find(f => f.id === initialFileId);
-            if (file) {
-              setActiveSection('hal-api');
-            }
-          }
-
-          // If not found in HAL API, look in models
-          if (!file) {
-            for (const model of modelsData) {
-              file = model.files.find(f => f.id === initialFileId);
-              if (file) {
-                setExpandedModelId(model.id);
-                setActiveSection('models');
-                break;
-              }
-            }
-          }
-
-          if (file) {
-            setSelectedFile(file);
+          const model = models.find(m => m.files?.some(f => f.id === initialFileId));
+          if (model) {
+            setExpandedNodes(prev => ({
+              ...prev,
+              modelId: 'models',
+              expandedModels: [...prev.expandedModels, model.id]
+            }));
           }
         }
+
+        // If initialFileId is provided, load the file content
+        if (initialFileId) {
+          handleFileSelect(initialFileId);
+        }
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast.error('Failed to load content');
+        console.error('Error loading data:', error);
+        toast.error('Failed to load instrument data');
       } finally {
         setLoading(false);
       }
     };
-  }, [instrument.id, initialFileId]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const handleSectionChange = (sectionId: string) => {
-    setActiveSection(sectionId as TabType);
-    // Don't clear selection when changing sections
-  };
+    loadData();
+  }, [instrument?.id, initialFileId]);
 
   const handleFileSelect = async (fileId: string) => {
     try {
+      setFileLoading(true);
       const file = await getFileContent(fileId);
-      if (file) {
-        // Clear previous selection
-        setSelectedFile(null);
-        setIsEditing(false);
-
-        // Set new selection
-        setSelectedFile(file);
-
-        // Find the model if it's a model file
-        const model = models.find(m => m.files.some(f => f.id === fileId));
-        if (model) {
-          setExpandedModelId(model.id);
-        }
-
-        // Update URL with file info
-        const fileType = file.type.toLowerCase();
-        navigate(`/explorer/${instrument.id}/${fileType}/${fileId}`, { replace: true });
+      if (!file) {
+        toast.error('File not found');
+        return;
       }
+      setSelectedFile(file);
     } catch (error) {
-      console.error('Error fetching file content:', error);
+      console.error('Error loading file:', error);
       toast.error('Failed to load file content');
-    }
-  };
-
-  const handleFileDownload = async () => {
-    if (!selectedFile) return;
-    try {
-      const result = await downloadFile(selectedFile.id);
-      if (result) {
-        const blob = new Blob([result.content], { type: 'text/plain' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = result.name;
-        a.click();
-        URL.revokeObjectURL(url);
-        toast.success('File downloaded successfully');
-      }
-    } catch (error) {
-      console.error('Error downloading file:', error);
-      toast.error('Failed to download file');
+    } finally {
+      setFileLoading(false);
     }
   };
 
@@ -144,32 +96,88 @@ const InstrumentDetailView: React.FC<InstrumentDetailViewProps> = ({
     if (!selectedFile) return;
 
     try {
-      const success = await saveFileContent(selectedFile.id, content);
-      if (success) {
-        setSelectedFile(prev => prev ? { ...prev, content } : null);
-        setIsEditing(false);
-        toast.success('File saved successfully');
-      }
+      // Update the file content
+      const updatedFile = { ...selectedFile, content };
+      setSelectedFile(updatedFile);
+      setIsEditing(false);
+      toast.success('File saved successfully');
     } catch (error) {
       console.error('Error saving file:', error);
       toast.error('Failed to save file');
     }
   };
 
+  const handleFileDownload = async () => {
+    if (!selectedFile) return;
+    try {
+      const blob = new Blob([selectedFile.content], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = selectedFile.name;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('File downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading file:', error);
+      toast.error('Failed to download file');
+    }
+  };
+
   const handleCancelEdit = () => {
     setIsEditing(false);
-    // Reset the content
-    if (selectedFile) {
-      getFileContent(selectedFile.id).then(file => {
-        if (file) {
-          setSelectedFile(file);
-        }
-      });
+  };
+
+  const handleNodeExpand = (type: 'instrument' | 'model', id: string) => {
+    setExpandedNodes(prev => {
+      switch (type) {
+        case 'instrument':
+          return {
+            ...prev,
+            instrumentId: prev.instrumentId === id ? null : id,
+            modelId: prev.instrumentId === id ? null : 'models'
+          };
+        case 'model':
+          if (id === 'models') {
+            return {
+              ...prev,
+              modelId: prev.modelId === 'models' ? null : 'models'
+            };
+          }
+          return {
+            ...prev,
+            modelId: 'models',
+            expandedModels: prev.expandedModels.includes(id)
+              ? prev.expandedModels.filter(m => m !== id)
+              : [...prev.expandedModels, id]
+          };
+        default:
+          return prev;
+      }
+    });
+  };
+
+  const getFileType = (type: string): 'manual' | 'documentation' | 'hal' | 'api' | 'panel' | 'driver' => {
+    switch (type.toLowerCase()) {
+      case 'driver':
+        return 'driver';
+      case 'manual':
+        return 'manual';
+      case 'documentation':
+        return 'documentation';
+      case 'abstract':
+        return 'hal';
+      case 'api':
+        return 'api';
+      case 'panel':
+        return 'panel';
+      default:
+        return 'documentation';
     }
   };
 
   const getFileActions = (file: FileItem) => {
-    const actions: { allowEdit: boolean; allowDownload: boolean } = {
+    const actions = {
       allowEdit: file.allowedActions?.includes('edit') ?? false,
       allowDownload: file.allowedActions?.includes('download') ?? true
     };
@@ -180,30 +188,41 @@ const InstrumentDetailView: React.FC<InstrumentDetailViewProps> = ({
     <div className="flex h-full overflow-hidden">
       <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
         <TreeNav
-          activeSection={activeSection}
-          onSectionChange={handleSectionChange}
-          halApi={halApi}
-          models={models}
+          instruments={allInstruments}
+          halApi={null}
+          models={modelsData}
           loading={loading}
           onFileSelect={handleFileSelect}
           selectedFileId={selectedFile?.id}
-          expandedModelId={expandedModelId}
-          onModelExpand={setExpandedModelId}
+          expandedNodes={expandedNodes}
+          onNodeExpand={handleNodeExpand}
+          halApiData={halApiData}
+          explorerData={explorerData}
         />
       </div>
 
       <div className="flex-1 bg-white overflow-auto">
-        {selectedFile ? (
-          <FileEditor
-            content={selectedFile.content}
-            fileName={selectedFile.name}
-            isEditing={isEditing}
-            onSave={handleSaveFile}
-            onStartEdit={() => setIsEditing(true)}
-            onDownload={handleFileDownload}
-            onCancel={handleCancelEdit}
-            {...getFileActions(selectedFile)}
-          />
+        {fileLoading ? (
+          <div className="h-full flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mb-4"></div>
+              <p className="text-sm text-gray-500">Loading file content...</p>
+            </div>
+          </div>
+        ) : selectedFile ? (
+          <ErrorBoundary>
+            <FileEditor
+              content={selectedFile.content}
+              fileName={selectedFile.name}
+              isEditing={isEditing}
+              fileType={getFileType(selectedFile.type)}
+              onSave={handleSaveFile}
+              onStartEdit={() => setIsEditing(true)}
+              onDownload={handleFileDownload}
+              onCancel={handleCancelEdit}
+              {...getFileActions(selectedFile)}
+            />
+          </ErrorBoundary>
         ) : (
           <div className="h-full flex items-center justify-center bg-gray-50">
             <div className="text-center p-6">

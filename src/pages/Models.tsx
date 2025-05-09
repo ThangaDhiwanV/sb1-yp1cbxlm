@@ -2,19 +2,23 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import ModelsGrid from '../components/ModelsGrid/ModelsGrid';
 import { getModelsByInstrumentId, getInstrumentById } from '../api/instrumentService';
-import { Model } from '../types';
+import { Model, Instrument } from '../types';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { debounce } from '../utils/debounce';
+import Button from '../components/common/Button';
+import { Wrench } from 'lucide-react';
+import { useCreationContext } from '../App';
 
 const Models: React.FC = () => {
     const { instrumentId } = useParams<{ instrumentId: string }>();
     const [models, setModels] = useState<Model[]>([]);
-    const [instrumentName, setInstrumentName] = useState<string>('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
+    const { setIsCreationSliderOpen } = useCreationContext();
+    const [selectedInstrument, setSelectedInstrument] = useState<Instrument | null>(null);
 
     const fetchData = useCallback(async () => {
         if (!instrumentId) return;
@@ -27,7 +31,7 @@ const Models: React.FC = () => {
             ]);
 
             if (instrument) {
-                setInstrumentName(instrument.name);
+                setSelectedInstrument(instrument);
             }
 
             // Apply search filter
@@ -68,16 +72,28 @@ const Models: React.FC = () => {
     }, 300);
 
     const breadcrumbItems = [
-        { label: 'Instruments', href: '/' },
-        { label: instrumentName || 'Instrument' },
-        { label: 'Models' }
+        { label: 'Project', href: '/' },
+        { label: 'All Instruments', href: '/instruments' },
+        {
+            label: selectedInstrument
+                ? `${selectedInstrument.name} (${selectedInstrument.type})`
+                : 'Models'
+        }
     ];
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
-                <Breadcrumbs items={breadcrumbItems} />
-                <h1 className="text-2xl font-bold text-gray-800 mt-4">Models</h1>
+                <div className="flex justify-between items-center">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <Button
+                        onClick={() => setIsCreationSliderOpen(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Wrench className="h-4 w-4" />
+                        Create HAL/Driver
+                    </Button>
+                </div>
             </div>
 
             {error ? (

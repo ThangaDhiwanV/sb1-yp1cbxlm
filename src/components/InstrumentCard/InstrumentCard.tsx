@@ -5,7 +5,6 @@ import { toast } from 'sonner';
 import Card, { CardContent } from '../common/Card';
 import { Instrument } from '../../types';
 import { cn } from '../../utils/cn';
-import { getHalApiByInstrumentId, getFileContent } from '../../api/instrumentService';
 
 interface InstrumentCardProps {
   instrument: Instrument;
@@ -15,7 +14,7 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/models/${instrument.id}`);  // Navigate to models page for this instrument
+    navigate(`/models/${instrument.id}`);
   };
 
   const getInstrumentIcon = (type: string) => {
@@ -24,61 +23,62 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
         return Zap;
       case 'DMM':
         return Ruler;
-      case 'Power':
+      case 'Power Supply':
         return Battery;
       default:
         return Cpu;
     }
   };
 
-  const checkAndNavigate = async (viewType: string) => {
+  const checkAndNavigate = async (viewType: 'hal' | 'api' | 'documentation' | 'panel') => {
     try {
-      const halApi = await getHalApiByInstrumentId(instrument.id);
-      let fileId: string | undefined;
-      let fileType: string | undefined;
+      // Check if the selected feature is available
+      let isAvailable = false;
+      let errorMessage = "";
 
-      if (viewType === 'hal') {
-        const file = halApi?.files.find(f => f.type === 'abstract');
-        if (file) {
-          fileId = file.id;
-          fileType = 'hal';
-        }
-      } else if (viewType === 'api') {
-        const file = halApi?.files.find(f => f.type === 'api');
-        if (file) {
-          fileId = file.id;
-          fileType = 'api';
-        }
-      } else if (viewType === 'manual') {
-        const file = halApi?.files.find(f => f.type === 'Documentation');
-        if (file) {
-          fileId = file.id;
-          fileType = 'manual';
-        }
+      switch (viewType) {
+        case 'hal':
+          isAvailable = instrument.hasAbstractClass || false;
+          errorMessage = "HAL is not available for this instrument";
+          break;
+        case 'api':
+          isAvailable = instrument.hasApi || false;
+          errorMessage = "API is not available for this instrument";
+          break;
+        case 'documentation':
+          isAvailable = instrument.documentation || false;
+          errorMessage = "Documentation is not available for this instrument";
+          break;
+        case 'panel':
+          isAvailable = instrument.hasSoftPanel || false;
+          errorMessage = "Soft Panel is not available for this instrument";
+          break;
       }
 
-      if (fileId && fileType) {
-        const fileContent = await getFileContent(fileId);
-        if (fileContent) {
-          navigate(`/explorer/${instrument.id}/${fileType}/${fileId}`);
-        } else {
-          toast.error(`Unable to load ${viewType} content`);
-        }
-      } else {
-        const contentTypes: Record<string, string> = {
-          hal: 'HAL',
-          api: 'API',
-          manual: 'Documentation',
-          panel: 'Soft Panel'
-        };
-        toast.error(`${contentTypes[viewType]} is not available for this instrument`);
+      if (!isAvailable) {
+        toast.error(errorMessage);
+        return;
       }
+
+      // Navigate to explorer with the specific section
+      navigate(`/explorer/${instrument.type}`, {
+        state: {
+          fileType: viewType,
+          instrumentId: instrument.id
+        }
+      });
+
     } catch (error) {
-      toast.error('Failed to check content availability');
+      console.error('Error:', error);
+      toast.error('Failed to load content');
     }
   };
 
-  const IconButton = ({ icon: Icon, label, viewType }: { icon: React.ElementType; label: string; viewType: string }) => {
+  const IconButton = ({ icon: Icon, label, viewType }: {
+    icon: React.ElementType;
+    label: string;
+    viewType: 'hal' | 'api' | 'documentation' | 'panel'
+  }) => {
     const handleIconClick = (e: React.MouseEvent) => {
       e.stopPropagation();
       checkAndNavigate(viewType);
@@ -113,29 +113,21 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
         'transform transition-all duration-200 hover:scale-[1.02] min-h-[200px]',
         'bg-gradient-to-br',
         instrument.type === 'SMU'
-          ? 'from-primary-50 to-primary-100 hover:from-primary-100 hover:to-primary-200'
-          : 'from-cyan-50 to-blue-50 hover:from-cyan-100 hover:to-blue-100'
+          ? 'from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100'
+          : instrument.type === 'DMM'
+            ? 'from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100'
+            : 'from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100'
       )}
       onClick={handleClick}
     >
-      <CardContent className="p-6">
-        <div className="flex items-start justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className={cn(
-              'p-3 rounded-lg',
-              instrument.type === 'SMU'
-                ? 'bg-primary-100'
-                : 'bg-cyan-100'
-            )}>
-              <InstrumentIcon className={cn(
-                'h-7 w-7',
-                instrument.type === 'SMU'
-                  ? 'text-primary-600'
-                  : 'text-cyan-600'
-              )} />
-            </div>
+      <CardContent>
+        <div className="mb-6">
+          <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-semibold mb-2">{instrument.name}</h3>
+              <div className="flex items-center gap-2 mb-2">
+                <InstrumentIcon className="h-5 w-5 text-gray-700" />
+                <h3 className="font-medium text-gray-900">{instrument.name}</h3>
+              </div>
               <div className={cn(
                 'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm',
                 'bg-gray-100/80 text-gray-700 w-fit'
@@ -148,7 +140,7 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
         </div>
 
         <div className="flex justify-between items-center px-4">
-          <IconButton icon={BookOpen} label="Documentation" viewType="manual" />
+          <IconButton icon={BookOpen} label="Documentation" viewType="documentation" />
           <IconButton icon={Code2} label="HAL" viewType="hal" />
           <IconButton icon={FileText} label="API" viewType="api" />
           <IconButton icon={Layout} label="Panel" viewType="panel" />

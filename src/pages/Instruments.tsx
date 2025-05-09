@@ -3,6 +3,11 @@ import InstrumentGrid from '../components/InstrumentCard/InstrumentGrid';
 import { getInstruments } from '../api/instrumentService';
 import { Instrument } from '../types';
 import { debounce } from '../utils/debounce';
+import { Wrench } from 'lucide-react';
+import Button from '../components/common/Button';
+import { useCreationContext } from '../App';
+import { toast } from 'sonner';
+import Breadcrumbs from '../components/common/Breadcrumbs';
 
 const Instruments: React.FC = () => {
     const [instruments, setInstruments] = useState<Instrument[]>([]);
@@ -14,6 +19,7 @@ const Instruments: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [sortBy, setSortBy] = useState<string | undefined>();
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const { setIsCreationSliderOpen } = useCreationContext();
 
     const fetchInstruments = useCallback(async () => {
         try {
@@ -32,6 +38,7 @@ const Instruments: React.FC = () => {
         } catch (err) {
             setError('Failed to fetch instruments. Please try again later.');
             console.error('Error fetching instruments:', err);
+            toast.error('Failed to fetch instruments');
         } finally {
             setLoading(false);
         }
@@ -56,10 +63,24 @@ const Instruments: React.FC = () => {
         setSortOrder(newSortOrder);
     };
 
+    const breadcrumbItems = [
+        { label: 'Project', href: '/' },
+        { label: 'All Instruments' }
+    ];
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-800">Instruments</h1>
+            <div className="mb-8">
+                <div className="flex justify-between items-center">
+                    <Breadcrumbs items={breadcrumbItems} />
+                    <Button
+                        onClick={() => setIsCreationSliderOpen(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Wrench className="h-4 w-4" />
+                        Create HAL/Driver
+                    </Button>
+                </div>
             </div>
 
             {error ? (

@@ -53,6 +53,8 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
     onSort(field, newOrder);
   };
 
+  const uniqueTypes = Array.from(new Set(instruments.map(inst => inst.type))).sort();
+
   return (
     <div>
       <div className="mb-6">
@@ -82,8 +84,9 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
               defaultValue=""
             >
               <option value="">All types</option>
-              <option value="SMU">SMU</option>
-              <option value="DMM">DMM</option>
+              {uniqueTypes.map(type => (
+                <option key={type} value={type}>{type}</option>
+              ))}
             </select>
           </div>
 

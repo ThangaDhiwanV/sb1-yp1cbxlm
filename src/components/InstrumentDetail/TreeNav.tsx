@@ -1,156 +1,194 @@
 import React from 'react';
-import { ChevronRight, ChevronDown, FileText, Book, Code2, MonitorSmartphone, HardDrive, FileCode, FileBox, Box } from 'lucide-react';
-import { cn } from '../../utils/cn';
-import { HalApi, Model } from '../../types';
+import { FolderOpen, FileCode, ChevronRight, ChevronDown } from 'lucide-react';
+import { Instrument, Model, HalApi, FileItem, InstrumentCapabilities, ExplorerResponse } from '../../types';
 
 interface TreeNavProps {
-    activeSection: string;
-    onSectionChange: (section: string) => void;
+    instruments: Instrument[];
     halApi: HalApi | null;
     models: Model[];
     loading: boolean;
     onFileSelect: (fileId: string) => void;
     selectedFileId?: string;
-    expandedModelId?: string | null;
-    onModelExpand?: (modelId: string | null) => void;
+    expandedNodes: {
+        instrumentId: string | null;
+        modelId: string | null;
+        expandedModels: string[];
+    };
+    onNodeExpand: (type: 'instrument' | 'model', id: string) => void;
+    halApiData: HalApi[];
+    explorerData?: ExplorerResponse;
 }
 
-const TreeNode: React.FC<{
-    label: string;
-    icon?: React.ElementType;
-    expanded?: boolean;
-    selected?: boolean;
-    onClick?: () => void;
-    depth?: number;
-    hasChildren?: boolean;
-}> = ({
-    label,
-    icon: Icon,
-    expanded,
-    selected,
-    onClick,
-    depth = 0,
-    hasChildren
-}) => {
-        const paddingLeft = `${depth * 1.5}rem`;
-        const ChevronIcon = expanded ? ChevronDown : ChevronRight;
-
-        return (
-            <button
-                onClick={onClick}
-                className={cn(
-                    'w-full px-3 py-2 flex items-center text-sm transition-colors',
-                    'hover:bg-primary-50',
-                    selected && 'bg-primary-50 text-primary-600'
-                )}
-                style={{ paddingLeft }}
-            >
-                {hasChildren ? (
-                    <ChevronIcon className="h-4 w-4 mr-2 text-primary-400" />
-                ) : (
-                    <span className="w-4 mr-2" />
-                )}
-                {Icon && <Icon className={cn("h-4 w-4 mr-2", selected ? "text-primary-500" : "text-gray-500")} />}
-                <span className="truncate">{label}</span>
-            </button>
-        );
-    };
-
 const TreeNav: React.FC<TreeNavProps> = ({
-    activeSection,
-    onSectionChange,
-    halApi,
-    models,
+    instruments,
     loading,
     onFileSelect,
     selectedFileId,
-    expandedModelId,
-    onModelExpand
+    expandedNodes,
+    onNodeExpand,
+    halApiData,
+    explorerData
 }) => {
-    const getFileIcon = (type: string) => {
-        switch (type.toLowerCase()) {
-            case 'driver':
-                return HardDrive;
-            case 'manual':
-                return Book;
-            case 'documentation':
-                return FileText;
-            case 'api':
-                return Code2;
-            case 'abstract':
-                return FileCode;
-            default:
-                return FileBox;
-        }
+    const renderFileNode = (
+        instrumentId: string,
+        modelName: string | undefined,
+        fileName: string,
+        fileType: string,
+        depth: number = 0
+    ) => {
+        // Generate a consistent file ID format: instrumentId_modelName_fileType or instrumentId_fileType
+        const fileId = modelName ? `${instrumentId}_${modelName}_${fileType}` : `${instrumentId}_${fileType}`;
+        const isSelected = selectedFileId === fileId;
+
+        return (
+            <div
+                key={fileId}
+                className={`pl-${depth * 4} py-1 cursor-pointer hover:bg-gray-100 ${isSelected ? 'bg-blue-50' : ''
+                    }`}
+                onClick={() => onFileSelect(fileId)}
+            >
+                <div className="flex items-center">
+                    <FileCode className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{fileName}</span>
+                </div>
+            </div>
+        );
     };
 
-    const handleModelClick = (modelId: string) => {
-        if (onModelExpand) {
-            onModelExpand(expandedModelId === modelId ? null : modelId);
-        }
+    const renderInstrumentNode = (instrument: Instrument) => {
+        const isExpanded = expandedNodes.instrumentId === instrument.id;
+        const instrumentData = explorerData?.[instrument.type];
+        const halApi = halApiData.find(h => h.instrumentId === instrument.id);
+
+        return (
+            <div key={instrument.id} className="mb-2">
+                <div
+                    className="flex items-center py-1 px-2 cursor-pointer hover:bg-gray-100"
+                    onClick={() => onNodeExpand('instrument', instrument.id)}
+                >
+                    {isExpanded ? (
+                        <ChevronDown className="h-4 w-4 mr-1" />
+                    ) : (
+                        <ChevronRight className="h-4 w-4 mr-1" />
+                    )}
+                    <FolderOpen className="h-4 w-4 mr-2" />
+                    <span className="text-sm font-medium">{instrument.name}</span>
+                </div>
+
+                {isExpanded && (
+                    <div className="pl-4">
+                        {/* HAL/API Section */}
+                        {instrumentData?.hal && (
+                            <div className="mb-2">
+                                <div className="flex items-center py-1">
+                                    <FolderOpen className="h-4 w-4 mr-2" />
+                                    <span className="text-sm">HAL/API</span>
+                                </div>
+                                <div className="pl-4">
+                                    {renderFileNode(instrument.id, undefined, 'HAL', 'hal', 1)}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* API Section */}
+                        {instrumentData?.api && (
+                            <div className="mb-2">
+                                <div className="pl-4">
+                                    {renderFileNode(instrument.id, undefined, 'API', 'api', 1)}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Documentation Section */}
+                        {instrumentData?.documentation && (
+                            <div className="mb-2">
+                                <div className="pl-4">
+                                    {renderFileNode(instrument.id, undefined, 'Documentation', 'docs', 1)}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Models Section */}
+                        {instrumentData?.models && instrumentData.models.length > 0 && (
+                            <div>
+                                <div
+                                    className="flex items-center py-1 cursor-pointer hover:bg-gray-100"
+                                    onClick={() => onNodeExpand('model', 'models')}
+                                >
+                                    {expandedNodes.modelId === 'models' ? (
+                                        <ChevronDown className="h-4 w-4 mr-1" />
+                                    ) : (
+                                        <ChevronRight className="h-4 w-4 mr-1" />
+                                    )}
+                                    <FolderOpen className="h-4 w-4 mr-2" />
+                                    <span className="text-sm">Models</span>
+                                </div>
+
+                                {expandedNodes.modelId === 'models' && (
+                                    <div className="pl-4">
+                                        {instrumentData.models.map(modelObj => {
+                                            const modelName = Object.keys(modelObj)[0];
+                                            const modelCapabilities = modelObj[modelName];
+                                            const isModelExpanded = expandedNodes.expandedModels.includes(modelName);
+
+                                            return (
+                                                <div key={modelName}>
+                                                    <div
+                                                        className="flex items-center py-1 cursor-pointer hover:bg-gray-100"
+                                                        onClick={() => onNodeExpand('model', modelName)}
+                                                    >
+                                                        {isModelExpanded ? (
+                                                            <ChevronDown className="h-4 w-4 mr-1" />
+                                                        ) : (
+                                                            <ChevronRight className="h-4 w-4 mr-1" />
+                                                        )}
+                                                        <FolderOpen className="h-4 w-4 mr-2" />
+                                                        <span className="text-sm">{modelName}</span>
+                                                    </div>
+
+                                                    {isModelExpanded && (
+                                                        <div className="pl-4">
+                                                            {modelCapabilities.driver && (
+                                                                renderFileNode(instrument.id, modelName, 'Driver', 'driver', 2)
+                                                            )}
+                                                            {modelCapabilities.manual && (
+                                                                renderFileNode(instrument.id, modelName, 'Manual', 'manual', 2)
+                                                            )}
+                                                            {modelCapabilities.panel && (
+                                                                renderFileNode(instrument.id, modelName, 'Panel', 'panel', 2)
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
     };
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500"></div>
+            <div className="p-4">
+                <div className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+                    <div className="h-4 bg-gray-200 rounded w-2/3 mb-4"></div>
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="py-2">
-            {/* HAL & API Section */}
-            <TreeNode
-                label="HAL"
-                icon={Box}
-                expanded={activeSection === 'hal-api'}
-                onClick={() => onSectionChange('hal-api')}
-                hasChildren={true}
-                selected={activeSection === 'hal-api'}
-            />
-            {activeSection === 'hal-api' && halApi?.files.map(file => (
-                <TreeNode
-                    key={file.id}
-                    label={file.name}
-                    icon={getFileIcon(file.type)}
-                    depth={1}
-                    selected={selectedFileId === file.id}
-                    onClick={() => onFileSelect(file.id)}
-                />
-            ))}
-
-            {/* Models Section */}
-            <TreeNode
-                label="Models"
-                icon={MonitorSmartphone}
-                expanded={activeSection === 'models'}
-                onClick={() => onSectionChange('models')}
-                hasChildren={true}
-                selected={activeSection === 'models'}
-            />
-            {activeSection === 'models' && models.map(model => (
-                <React.Fragment key={model.id}>
-                    <TreeNode
-                        label={model.name}
-                        icon={Box}
-                        depth={1}
-                        expanded={expandedModelId === model.id}
-                        onClick={() => handleModelClick(model.id)}
-                        hasChildren={true}
-                    />
-                    {expandedModelId === model.id && model.files.map(file => (
-                        <TreeNode
-                            key={file.id}
-                            label={file.name}
-                            icon={getFileIcon(file.type)}
-                            depth={2}
-                            selected={selectedFileId === file.id}
-                            onClick={() => onFileSelect(file.id)}
-                        />
-                    ))}
-                </React.Fragment>
-            ))}
+        <div className="p-2">
+            <div className="space-y-1">
+                {instruments.map(renderInstrumentNode)}
+            </div>
         </div>
     );
 };
