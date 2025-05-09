@@ -3,7 +3,7 @@ import InstrumentGrid from '../components/InstrumentCard/InstrumentGrid';
 import { getInstruments } from '../api/instrumentService';
 import { Instrument } from '../types';
 import { debounce } from '../utils/debounce';
-import { Wrench } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Button from '../components/common/Button';
 import { useCreationContext } from '../App';
 import { toast } from 'sonner';
@@ -75,10 +75,29 @@ const Instruments: React.FC = () => {
                     <Breadcrumbs items={breadcrumbItems} />
                     <Button
                         onClick={() => setIsCreationSliderOpen(true)}
-                        className="flex items-center gap-2"
+                        className={cn(
+                            "relative group overflow-hidden",
+                            "bg-gradient-to-r from-primary-500 to-secondary-500",
+                            "hover:from-primary-600 hover:to-secondary-600",
+                            "text-white font-medium",
+                            "px-6 py-2.5 rounded-xl",
+                            "shadow-lg shadow-primary-500/20",
+                            "transition-all duration-300",
+                            "border border-white/20",
+                            "hover:scale-[1.02]",
+                            "active:scale-[0.98]"
+                        )}
                     >
-                        <Wrench className="h-4 w-4" />
-                        Create HAL/Driver
+                        <span className="flex items-center gap-2">
+                            <Sparkles className="h-5 w-5" />
+                            <span>Create HAL/Driver</span>
+                        </span>
+                        <div className={cn(
+                            "absolute inset-0",
+                            "bg-gradient-to-r from-transparent via-white/20 to-transparent",
+                            "translate-x-[-100%] group-hover:translate-x-[100%]",
+                            "transition-transform duration-1000"
+                        )} />
                     </Button>
                 </div>
             </div>
