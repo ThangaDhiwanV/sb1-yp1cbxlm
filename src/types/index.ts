@@ -77,3 +77,27 @@ export interface InstrumentCapabilities {
 export interface ExplorerResponse {
   [key: string]: InstrumentCapabilities;
 }
+
+export interface DriverGenerationRequest {
+  instrument_name: string;
+  model_name: string;
+  functions: string[];
+  stack: string;
+}
+
+export interface DriverResponse {
+  driver: string;
+  message?: string;
+}
+
+export interface TechStackResponse {
+  types: string[];
+}
+
+export interface HalClassesResponse {
+  classes: string[];
+}
+
+export interface MethodsResponse {
+  methods: string[];
+}
