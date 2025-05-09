@@ -76,6 +76,7 @@ const Instruments: React.FC = () => {
                     <Button
                         onClick={() => setIsCreationSliderOpen(true)}
                         className="flex items-center gap-2"
+                        isCreationButton
                     >
                         <Wrench className="h-4 w-4" />
                         Create HAL/Driver

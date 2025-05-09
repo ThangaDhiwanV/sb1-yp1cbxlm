@@ -11,6 +11,7 @@ interface ButtonProps {
   type?: 'button' | 'submit' | 'reset';
   icon?: React.ElementType;
   loading?: boolean;
+  isCreationButton?: boolean;
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -23,6 +24,7 @@ const Button: React.FC<ButtonProps> = ({
   type = 'button',
   icon: Icon,
   loading = false,
+  isCreationButton = false,
 }) => {
   const baseClasses = cn(
     'inline-flex items-center justify-center font-medium relative overflow-hidden',
@@ -36,7 +38,14 @@ const Button: React.FC<ButtonProps> = ({
     'after:origin-right after:scale-x-0 hover:after:scale-x-100',
     'after:bg-gradient-to-l after:opacity-5',
     disabled && 'opacity-50 cursor-not-allowed pointer-events-none',
-    loading && 'cursor-wait'
+    loading && 'cursor-wait',
+    isCreationButton && [
+      'animate-float',
+      'hover:animate-none',
+      'hover:scale-105',
+      'active:scale-95',
+      'transition-all duration-300'
+    ]
   );
 
   const variantClasses = {
@@ -48,7 +57,13 @@ const Button: React.FC<ButtonProps> = ({
       'after:from-white/50 after:to-transparent',
       'shadow-md shadow-primary-500/10 hover:shadow-lg hover:shadow-primary-500/20',
       'rounded-lg',
-      'animate-bounce-in'
+      isCreationButton && [
+        'animate-pulse-glow',
+        'bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500',
+        'bg-[length:200%_100%]',
+        'hover:bg-[length:100%_100%]',
+        'transition-all duration-500'
+      ]
     ),
     secondary: cn(
       'bg-gradient-to-r from-secondary-500 to-secondary-600 text-white',
@@ -57,8 +72,7 @@ const Button: React.FC<ButtonProps> = ({
       'before:from-white before:to-transparent',
       'after:from-white/50 after:to-transparent',
       'shadow-md shadow-secondary-500/10 hover:shadow-lg hover:shadow-secondary-500/20',
-      'rounded-lg',
-      'animate-bounce-in'
+      'rounded-lg'
     ),
     outline: cn(
       'border-2 border-gray-200 bg-white text-gray-700',
@@ -108,14 +122,26 @@ const Button: React.FC<ButtonProps> = ({
       <span className={cn(
         'flex items-center gap-2 relative z-10',
         'transition-transform duration-300 ease-out',
-        'hover:scale-105',
-        loading && 'opacity-0'
+        loading && 'opacity-0',
+        isCreationButton && [
+          'group',
+          'hover:scale-105',
+          'transition-all duration-300'
+        ]
       )}>
-        {Icon && <Icon className={cn(
-          'h-4 w-4 transition-all duration-300',
-          'group-hover:scale-110 group-hover:rotate-3',
-          'animate-bounce-in'
-        )} />}
+        {Icon && (
+          <Icon className={cn(
+            'h-4 w-4 transition-all duration-300',
+            isCreationButton ? [
+              'group-hover:rotate-180',
+              'group-hover:scale-110',
+              'transition-all duration-500'
+            ] : [
+              'group-hover:scale-110',
+              'group-hover:rotate-3'
+            ]
+          )} />
+        )}
         {children}
       </span>
     </button>
