@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Download, Library, FileCode, Minimize2, Maximize2 } from 'lucide-react';
+import { X, Download, Library, FileCode, Minimize2, Maximize2, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import Button from './Button';
 import Card from './Card';
@@ -42,6 +42,7 @@ interface HalData {
     documentPreview: string | null;
     generatedPreview: string | null;
     previewType: PreviewType;
+    uploadedFile: File | null;
 }
 
 // Mock data constants
@@ -99,19 +100,16 @@ const mockAbstractCode = {
 const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState<TabType>('hal');
 
-    // Remove previewRef and handleScroll since we're using mouse scrolling
-
-    // Separate state for HAL and Driver
     const [halData, setHalData] = useState<HalData>({
         technology: '',
         document: '',
         isGenerated: false,
         documentPreview: null,
         generatedPreview: null,
-        previewType: 'document'
+        previewType: 'document',
+        uploadedFile: null
     });
 
-    // Enhanced driver state
     const [driverData, setDriverData] = useState<DriverData>({
         technology: '',
         instrumentType: '',
@@ -123,14 +121,12 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
         abstractPreview: null
     });
 
-    // Sections state for driver creation
     const [sections, setSections] = useState<Section[]>([
         { id: 'model', title: 'Model Selection', isExpanded: true },
         { id: 'manual', title: 'Manual Upload', isExpanded: true },
         { id: 'methods', title: 'Methods Selection', isExpanded: true }
     ]);
 
-    // Mock document content
     const documentContent: DocumentContent = {
         'SCPI Manual': `SCPI Command Reference Manual
 --------------------------------
@@ -190,22 +186,41 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setDriverData(prev => ({
-                ...prev,
-                file,
-                previewContent: null,
-                isGenerated: false
-            }));
+            if (activeTab === 'hal') {
+                setHalData(prev => ({
+                    ...prev,
+                    uploadedFile: file,
+                    documentPreview: null,
+                    isGenerated: false
+                }));
 
-            // Read and preview the file content
-            const reader = new FileReader();
-            reader.onload = (e) => {
+                // Read and preview the file content
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setHalData(prev => ({
+                        ...prev,
+                        documentPreview: e.target?.result as string
+                    }));
+                };
+                reader.readAsText(file);
+            } else {
                 setDriverData(prev => ({
                     ...prev,
-                    previewContent: e.target?.result as string
+                    file,
+                    previewContent: null,
+                    isGenerated: false
                 }));
-            };
-            reader.readAsText(file);
+
+                // Read and preview the file content
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    setDriverData(prev => ({
+                        ...prev,
+                        previewContent: e.target?.result as string
+                    }));
+                };
+                reader.readAsText(file);
+            }
         }
     };
 
@@ -222,7 +237,7 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
 
     const canGenerate = () => {
         if (activeTab === 'hal') {
-            return halData.technology !== '' && halData.document !== '';
+            return halData.technology !== '' && (halData.document !== '' || halData.uploadedFile !== null);
         }
         return (
             driverData.technology !== '' &&
@@ -236,14 +251,14 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
     const handleGenerate = () => {
         if (!canGenerate()) {
             toast.error(activeTab === 'hal'
-                ? 'Please select both technology and document'
+                ? 'Please select technology and either upload a file or select a document'
                 : 'Please select technology, upload a manual, and select at least one function'
             );
             return;
         }
 
         if (activeTab === 'hal') {
-            const generatedCode = `// Generated HAL content for ${halData.document}
+            const generatedCode = `// Generated HAL content for ${halData.document || halData.uploadedFile?.name}
 // Technology: ${halData.technology}
 
 class ${halData.document.replace(/\s+/g, '')}HAL {
@@ -329,7 +344,6 @@ class InstrumentDriver {
         }));
     };
 
-    // Section toggle handler
     const toggleSection = (sectionId: string) => {
         setSections(prev => prev.map(section =>
             section.id === sectionId
@@ -338,14 +352,13 @@ class InstrumentDriver {
         ));
     };
 
-    // Handle instrument type selection
     const handleInstrumentTypeSelect = (type: InstrumentType) => {
         setDriverData(prev => ({
             ...prev,
             instrumentType: type,
             abstractPreview: mockAbstractCode[type],
             isGenerated: false,
-            functions: [] // Reset functions when instrument type changes
+            functions: []
         }));
     };
 
@@ -354,7 +367,6 @@ class InstrumentDriver {
             className={`fixed inset-y-0 right-0 w-[800px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex ${isOpen ? 'translate-x-0' : 'translate-x-full'
                 }`}
         >
-            {/* Main Content Area */}
             <div className="flex-1 flex flex-col min-w-0">
                 <div className="flex items-center justify-between p-4 border-b">
                     <h2 className="text-xl font-semibold">
@@ -391,10 +403,8 @@ class InstrumentDriver {
                 </div>
 
                 <div className="flex-1 overflow-y-auto">
-                    {/* Form Section - now takes full width */}
                     <div className="w-full p-4">
                         <div className="space-y-4">
-                            {/* Technology Selection */}
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                     Select Technology
@@ -427,22 +437,52 @@ class InstrumentDriver {
                                 </select>
                             </div>
 
-                            {/* HAL Document Selection or Driver File Upload */}
                             {activeTab === 'hal' ? (
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                                        Select Instrument Document
-                                    </label>
-                                    <select
-                                        value={halData.document as DocumentType}
-                                        onChange={(e) => handleDocumentSelect(e.target.value as DocumentType)}
-                                        className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary-500"
-                                    >
-                                        <option value="">Choose document...</option>
-                                        {documents.map(doc => (
-                                            <option key={doc} value={doc}>{doc}</option>
-                                        ))}
-                                    </select>
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Select Instrument Document or Upload File
+                                        </label>
+                                        <div className="space-y-4">
+                                            <select
+                                                value={halData.document as DocumentType}
+                                                onChange={(e) => handleDocumentSelect(e.target.value as DocumentType)}
+                                                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary-500"
+                                            >
+                                                <option value="">Choose document...</option>
+                                                {documents.map(doc => (
+                                                    <option key={doc} value={doc}>{doc}</option>
+                                                ))}
+                                            </select>
+
+                                            <div className="flex items-center">
+                                                <span className="flex-grow border-t border-gray-300"></span>
+                                                <span className="px-3 text-sm text-gray-500">OR</span>
+                                                <span className="flex-grow border-t border-gray-300"></span>
+                                            </div>
+
+                                            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative group cursor-pointer">
+                                                <div className="space-y-1 text-center">
+                                                    <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-primary-500 transition-colors" />
+                                                    <div className="flex text-sm text-gray-600">
+                                                        <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">
+                                                            <span>Upload a file</span>
+                                                            <input
+                                                                type="file"
+                                                                className="sr-only"
+                                                                onChange={handleFileChange}
+                                                                accept=".pdf,.doc,.docx,.txt"
+                                                            />
+                                                        </label>
+                                                    </div>
+                                                    {halData.uploadedFile && (
+                                                        <p className="text-sm text-gray-500">{halData.uploadedFile.name}</p>
+                                                    )}
+                                                    <p className="text-xs text-gray-500">PDF, DOC, or TXT up to 10MB</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
                                 <div>
@@ -462,10 +502,8 @@ class InstrumentDriver {
                                 </div>
                             )}
 
-                            {/* Collapsible Sections for Driver */}
                             {activeTab === 'driver' && driverData.technology && driverData.instrumentType && (
                                 <>
-                                    {/* Model Selection Section */}
                                     <Card className="overflow-hidden">
                                         <div
                                             className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer"
@@ -493,7 +531,6 @@ class InstrumentDriver {
                                         )}
                                     </Card>
 
-                                    {/* Manual Upload Section */}
                                     <Card className="overflow-hidden">
                                         <div
                                             className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer"
@@ -530,7 +567,6 @@ class InstrumentDriver {
                                         )}
                                     </Card>
 
-                                    {/* Methods Selection Section */}
                                     <Card className="overflow-hidden">
                                         <div
                                             className="flex items-center justify-between p-3 bg-gray-50 cursor-pointer"
@@ -578,7 +614,6 @@ class InstrumentDriver {
                                 </>
                             )}
 
-                            {/* Generate Button */}
                             <Button
                                 onClick={handleGenerate}
                                 className="w-full"
@@ -588,25 +623,24 @@ class InstrumentDriver {
                                 Generate {activeTab === 'hal' ? 'HAL' : 'Driver'}
                             </Button>
 
-                            {/* Action Buttons */}
-                            {activeTab === 'hal' ? (
-                                <div className="mt-4 flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1"
-                                        disabled={!halData.isGenerated}
-                                    >
-                                        <Library className="h-4 w-4 mr-2" />
-                                        Add to Library
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1"
-                                        disabled={!halData.isGenerated}
-                                    >
-                                        <Download className="h-4 w-4 mr-2" />
-                                        Download HAL
-                                    </Button>
+                            <div className="mt-4 flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    disabled={activeTab === 'hal' ? !halData.isGenerated : !driverData.isGenerated}
+                                >
+                                    <Library className="h-4 w-4 mr-2" />
+                                    Add to Library
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    disabled={activeTab === 'hal' ? !halData.isGenerated : !driverData.isGenerated}
+                                >
+                                    <Download className="h-4 w-4 mr-2" />
+                                    Download {activeTab === 'hal' ? 'HAL' : 'Driver'}
+                                </Button>
+                                {activeTab === 'hal' && (
                                     <Button
                                         variant="outline"
                                         className="flex-1"
@@ -615,27 +649,8 @@ class InstrumentDriver {
                                         <Download className="h-4 w-4 mr-2" />
                                         Download API
                                     </Button>
-                                </div>
-                            ) : (
-                                <div className="mt-4 flex gap-2">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1"
-                                        disabled={!driverData.isGenerated}
-                                    >
-                                        <Library className="h-4 w-4 mr-2" />
-                                        Add to Library
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1"
-                                        disabled={!driverData.isGenerated}
-                                    >
-                                        <Download className="h-4 w-4 mr-2" />
-                                        Download Driver
-                                    </Button>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
