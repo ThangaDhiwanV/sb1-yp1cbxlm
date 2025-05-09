@@ -5,7 +5,7 @@ import { Instrument } from '../types';
 import { debounce } from '../utils/debounce';
 import { cn } from '../utils/cn';
 import { toast } from 'sonner';
-import PageHeader from '../components/common/PageHeader';
+import Breadcrumbs from '../components/common/Breadcrumbs';
 
 const Instruments: React.FC = () => {
     const [instruments, setInstruments] = useState<Instrument[]>([]);
@@ -67,11 +67,9 @@ const Instruments: React.FC = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <PageHeader
-                title="Instruments"
-                description="Manage and explore your instrument collection"
-                breadcrumbs={breadcrumbItems}
-            />
+            <div className="mb-8">
+                <Breadcrumbs items={breadcrumbItems} />
+            </div>
 
             {error ? (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
