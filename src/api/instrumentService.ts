@@ -42,6 +42,26 @@ const setCache = <T>(key: string, data: T, map: Map<string, { data: T; timestamp
 // Simulated delay for mock API calls
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
+export const openModelPanel = async (instrumentId: string, modelId: string): Promise<boolean> => {
+  if (config.mockApi) {
+    await delay(500); // Simulate API delay
+    return true; // Mock successful panel opening
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/instruments/${instrumentId}/models/${modelId}/panel`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    return response.ok;
+  } catch (error) {
+    console.error('Error opening model panel:', error);
+    throw error;
+  }
+};
+
 export const getInstruments = async (params: PaginationParams): Promise<PaginatedResponse<Instrument>> => {
   try {
     if (config.mockApi) {
