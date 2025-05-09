@@ -76,14 +76,16 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
       checkAndNavigate(viewType);
     };
 
+    const tooltipLabel = viewType === 'api' ? 'API' : label;
+
     return (
       <div className="group relative">
         <div
           onClick={handleIconClick}
           className={cn(
             'p-2.5 rounded-lg transition-all duration-200',
-            'bg-white hover:bg-primary-50',
-            'border border-primary-100 hover:border-primary-300',
+            'bg-white/80 backdrop-blur-sm hover:bg-white',
+            'border border-white/60 hover:border-primary-200',
             'shadow-sm hover:shadow-md',
             'cursor-pointer'
           )}
@@ -91,13 +93,14 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
           <Icon className="h-5 w-5 text-primary-600" />
         </div>
         <div className={cn(
-          'absolute -top-8 left-1/2 transform -translate-x-1/2',
-          'px-2 py-1 rounded-md text-xs font-medium',
-          'bg-gray-800 text-white whitespace-nowrap',
+          'absolute -top-9 left-1/2 transform -translate-x-1/2',
+          'px-3 py-1.5 rounded-lg text-xs font-medium',
+          'bg-gray-900/90 text-white whitespace-nowrap',
           'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
-          'pointer-events-none z-10'
+          'pointer-events-none z-10',
+          'backdrop-blur-sm shadow-lg'
         )}>
-          {label}
+          {tooltipLabel}
         </div>
       </div>
     );

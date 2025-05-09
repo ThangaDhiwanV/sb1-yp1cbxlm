@@ -125,7 +125,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
         >
           <option value="">Sort by</option>
           <option value="name">Name</option>
-          <option value="type">Type</option>
+          <option value="driverCount">Number of Drivers</option>
         </select>
 
         {/* Pagination */}
