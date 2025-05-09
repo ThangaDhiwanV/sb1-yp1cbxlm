@@ -24,6 +24,44 @@ const setCache = <T>(key: string, data: T, map: Map<string, { data: T; timestamp
   map.set(key, { data, timestamp: Date.now() });
 };
 
+export const getSortOptions = async (): Promise<string[]> => {
+  if (config.mockApi) {
+    await delay(200);
+    return ['NAME_ASC', 'NAME_DESC', 'DRIVERS_ASC', 'DRIVERS_DESC'];
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/instruments/sort`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch sort options');
+    }
+    const data = await response.json();
+    return data.sort_options;
+  } catch (error) {
+    console.error('Error fetching sort options:', error);
+    throw error;
+  }
+};
+
+export const getFilterOptions = async (): Promise<string[]> => {
+  if (config.mockApi) {
+    await delay(200);
+    return ['DOCUMENTATION', 'PANEL', 'API', 'HAL'];
+  }
+
+  try {
+    const response = await fetch(`${BASE_URL}/instruments/filter`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch filter options');
+    }
+    const data = await response.json();
+    return data.filter_options;
+  } catch (error) {
+    console.error('Error fetching filter options:', error);
+    throw error;
+  }
+};
+
 export const getInstruments = async (params: PaginationParams): Promise<PaginatedResponse<Instrument>> => {
   try {
     if (config.mockApi) {
@@ -48,26 +86,30 @@ export const getInstruments = async (params: PaginationParams): Promise<Paginate
 
       // Apply sorting
       if (params.sortBy) {
-        filteredInstruments.sort((a, b) => {
-          let aVal: any = a[params.sortBy as keyof Instrument];
-          let bVal: any = b[params.sortBy as keyof Instrument];
+        const sortMapping: Record<string, string> = {
+          'name-asc': 'NAME_ASC',
+          'name-desc': 'NAME_DESC',
+          'driverCount-asc': 'DRIVERS_ASC',
+          'driverCount-desc': 'DRIVERS_DESC'
+        };
 
-          // Handle undefined values
-          if (aVal === undefined) aVal = 0;
-          if (bVal === undefined) bVal = 0;
+        const sortKey = `${params.sortBy}-${params.sortOrder}`;
+        const apiSortValue = sortMapping[sortKey];
 
-          // Handle string comparison
-          if (typeof aVal === 'string' && typeof bVal === 'string') {
-            return params.sortOrder === 'asc' 
-              ? aVal.localeCompare(bVal)
-              : bVal.localeCompare(aVal);
-          }
-
-          // Handle number comparison
-          return params.sortOrder === 'asc' 
-            ? aVal - bVal 
-            : bVal - aVal;
-        });
+        switch (apiSortValue) {
+          case 'NAME_ASC':
+            filteredInstruments.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+          case 'NAME_DESC':
+            filteredInstruments.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+          case 'DRIVERS_ASC':
+            filteredInstruments.sort((a, b) => (a.driverCount || 0) - (b.driverCount || 0));
+            break;
+          case 'DRIVERS_DESC':
+            filteredInstruments.sort((a, b) => (b.driverCount || 0) - (a.driverCount || 0));
+            break;
+        }
       }
 
       const total = filteredInstruments.length;
@@ -88,9 +130,9 @@ export const getInstruments = async (params: PaginationParams): Promise<Paginate
       page: params.page.toString(),
       page_size: params.pageSize.toString(),
       ...(params.search && { search: params.search }),
-      ...(params.type && { type: params.type }),
-      ...(params.sortBy && params.sortOrder && { 
-        sort: `${params.sortBy}_${params.sortOrder}` 
+      ...(params.type && { filter: params.type }),
+      ...(params.sortBy && params.sortOrder && {
+        sort: `${params.sortBy.toUpperCase()}_${params.sortOrder.toUpperCase()}`
       })
     });
 
@@ -105,7 +147,24 @@ export const getInstruments = async (params: PaginationParams): Promise<Paginate
       throw new Error(`API request failed: ${response.statusText}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return {
+      data: Object.entries(data.data).map(([type, details]: [string, any]) => ({
+        id: type,
+        name: type,
+        type,
+        driverCount: details.no_of_drivers || 0,
+        hasAbstractClass: details.hal || false,
+        hasDocs: details.documentation || false,
+        hasSoftPanel: details.panel || false,
+        hasApi: details.api || false,
+        documentation: details.documentation || false
+      })),
+      total: data.pagination.total_items,
+      page: data.pagination.page,
+      pageSize: data.pagination.page_size,
+      totalPages: data.pagination.total_pages
+    };
   } catch (error) {
     console.error('Error fetching instruments:', error);
     throw error;
