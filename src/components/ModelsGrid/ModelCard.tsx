@@ -38,9 +38,11 @@ const ModelCard: React.FC<ModelCardProps> = ({ model }) => {
         e.stopPropagation();
         try {
             const success = await openModelPanel(model.instrumentId, model.id);
-            toast[success ? 'success' : 'error'](
-                success ? 'Panel opened successfully' : 'Failed to open panel'
-            );
+            if (success) {
+                toast.success('Panel opened successfully');
+            } else {
+                toast.error('Failed to open panel');
+            }
         } catch (error) {
             console.error('Error opening panel:', error);
             toast.error('Failed to open panel');
