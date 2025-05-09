@@ -1,14 +1,15 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Database, Microscope, Boxes, Settings } from 'lucide-react';
+import { Home, Database, Microscope, Boxes, Settings, FolderTree } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
 
 const navItems = [
-    { id: 'project', label: 'Project', icon: Home, path: '/' },
-    { id: 'macrobs', label: 'Macros', icon: Database, path: '/macrobs' },
-    { id: 'vb', label: 'Virtual Bench', icon: Microscope, path: '/vb' },
+    { id: 'explorer', label: 'Explorer', icon: FolderTree, path: '/' },
+    { id: 'project', label: 'Project', icon: Home, path: '/project' },
     { id: 'instruments', label: 'Instruments', icon: Boxes, path: '/instruments' },
+    { id: 'macros', label: 'Macros', icon: Database, path: '/macros' },
+    { id: 'virtual-bench', label: 'Virtual Bench', icon: Microscope, path: '/virtual-bench' },
 ];
 
 const SideNav: React.FC = () => {
@@ -17,7 +18,6 @@ const SideNav: React.FC = () => {
 
     return (
         <>
-            {/* Title Bar */}
             <header className={cn(
                 "fixed top-0 left-0 right-0 h-14 z-30",
                 "bg-white border-b border-gray-200",
@@ -44,7 +44,6 @@ const SideNav: React.FC = () => {
                 </Tooltip>
             </header>
 
-            {/* Side Navigation */}
             <nav className={cn(
                 "w-16 fixed left-0 top-14 bottom-0 z-20",
                 "bg-white border-r border-gray-200",
@@ -91,7 +90,6 @@ const SideNav: React.FC = () => {
                     </ul>
                 </div>
 
-                {/* Version Tag */}
                 <div className={cn(
                     "px-3 py-2 mt-auto",
                     "text-[10px] font-medium",
