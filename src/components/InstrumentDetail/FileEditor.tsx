@@ -137,29 +137,44 @@ const FileEditor: React.FC<FileEditorProps> = ({
 
   if (isEditing) {
     return (
-      <div className="flex flex-col h-full">
-        <div className="flex-1 overflow-auto">
-          <textarea
-            className="w-full h-full p-4 font-mono text-sm border-0 focus:ring-0 resize-none"
-            value={editableContent}
-            onChange={(e) => setEditableContent(e.target.value)}
-          />
+        <div className="flex flex-col h-full">
+            <div className="flex-1 overflow-auto bg-gray-50">
+                <textarea
+                    className={cn(
+                        "w-full h-full p-4 font-mono text-sm",
+                        "bg-white border-0 focus:ring-0 resize-none",
+                        "focus:outline-none"
+                    )}
+                    value={editableContent}
+                    onChange={(e) => setEditableContent(e.target.value)}
+                />
+            </div>
+            <div className="flex justify-end gap-2 p-4 bg-gray-50 border-t">
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium rounded-lg",
+                        "text-gray-700 bg-white",
+                        "border border-gray-200",
+                        "hover:bg-gray-50 hover:border-gray-300",
+                        "transition-colors duration-200"
+                    )}
+                    onClick={onCancel}
+                >
+                    Cancel
+                </button>
+                <button
+                    className={cn(
+                        "px-4 py-2 text-sm font-medium rounded-lg",
+                        "text-white bg-primary-600",
+                        "hover:bg-primary-700",
+                        "transition-colors duration-200"
+                    )}
+                    onClick={handleSave}
+                >
+                    Save
+                </button>
+            </div>
         </div>
-        <div className="flex justify-end gap-2 p-4 bg-white border-t">
-          <button
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-          <button
-            className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-md hover:bg-primary-700"
-            onClick={handleSave}
-          >
-            Save
-          </button>
-        </div>
-      </div>
     );
   }
 

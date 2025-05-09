@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Wrench, Edit2, Download } from 'lucide-react';
+import { Wrench, Edit2, Download, Search } from 'lucide-react';
 import { TreeView, TreeNode } from '../components/common/TreeView';
 import { ExplorerResponse } from '../types';
 import Breadcrumbs from '../components/common/Breadcrumbs';
@@ -10,6 +10,7 @@ import { getFileContent, saveFileContent } from '../api/instrumentService';
 import { getExplorerData } from '../api';
 import FileEditor from '../components/InstrumentDetail/FileEditor';
 import { toast } from 'sonner';
+import { cn } from '../utils/cn';
 
 interface LocationState {
     fileType: 'hal' | 'api' | 'documentation' | 'panel';
@@ -217,22 +218,40 @@ const Explorer: React.FC = () => {
     ];
 
     return (
-        <div className="flex flex-col h-screen">
-            <div className="flex-none p-4 border-b border-gray-200 bg-white">
-                <div className="flex justify-between items-center">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <Button
-                        onClick={() => setIsCreationSliderOpen(true)}
-                        className="flex items-center gap-2"
-                    >
-                        <Wrench className="h-4 w-4" />
-                        Create HAL/Driver
-                    </Button>
+        <div className="flex flex-col h-screen bg-gray-50">
+            <div className="flex-none p-6 border-b border-gray-200 bg-white">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex justify-between items-center mb-6">
+                        <Breadcrumbs items={breadcrumbItems} />
+                        <Button
+                            onClick={() => setIsCreationSliderOpen(true)}
+                            className="flex items-center gap-2"
+                        >
+                            <Wrench className="h-4 w-4" />
+                            Create HAL/Driver
+                        </Button>
+                    </div>
                 </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden">
-                <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-white overflow-y-auto">
+            <div className="flex flex-1 overflow-hidden p-6 gap-6 max-w-7xl mx-auto w-full">
+                <div className="w-80 flex-shrink-0">
+                    <div className="mb-4">
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                            <input
+                                type="text"
+                                placeholder="Search files..."
+                                className={cn(
+                                    "w-full pl-10 pr-4 py-2 rounded-lg",
+                                    "border border-gray-200",
+                                    "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+                                    "placeholder:text-gray-400 text-sm"
+                                )}
+                            />
+                        </div>
+                    </div>
+                    
                     {loading ? (
                         <div className="p-4">
                             <div className="animate-pulse space-y-2">
@@ -254,9 +273,9 @@ const Explorer: React.FC = () => {
                     )}
                 </div>
 
-                <div className="flex-1 bg-white overflow-auto">
+                <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                     {fileLoading ? (
-                        <div className="h-full flex items-center justify-center bg-gray-50">
+                        <div className="h-full flex items-center justify-center">
                             <div className="text-center">
                                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mb-4"></div>
                                 <p className="text-sm text-gray-500">Loading file content...</p>
@@ -264,24 +283,27 @@ const Explorer: React.FC = () => {
                         </div>
                     ) : selectedNode ? (
                         <div className="h-full flex flex-col">
-                            <div className="flex items-center justify-between p-4 border-b bg-white sticky top-0 z-10">
+                            <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
                                 <span className="text-sm font-medium text-gray-900">{selectedNode.label}</span>
                                 {selectedNode.type === 'file' && !selectedNode.error && (
-                                    <div className="flex items-center space-x-2 ml-auto">
-                                        <button
+                                    <div className="flex items-center gap-2">
+                                        <Button
                                             onClick={() => setIsEditing(true)}
-                                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                                            size="sm"
+                                            className="flex items-center gap-1.5"
                                         >
-                                            <Edit2 className="h-4 w-4 mr-1.5" />
+                                            <Edit2 className="h-4 w-4" />
                                             Edit
-                                        </button>
-                                        <button
+                                        </Button>
+                                        <Button
                                             onClick={handleDownload}
-                                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex items-center gap-1.5"
                                         >
-                                            <Download className="h-4 w-4 mr-1.5" />
+                                            <Download className="h-4 w-4" />
                                             Download
-                                        </button>
+                                        </Button>
                                     </div>
                                 )}
                             </div>
@@ -294,7 +316,7 @@ const Explorer: React.FC = () => {
                             />
                         </div>
                     ) : (
-                        <div className="h-full flex items-center justify-center bg-gray-50">
+                        <div className="h-full flex items-center justify-center">
                             <div className="text-center text-gray-500">
                                 <p>Select a file to view its content</p>
                             </div>
