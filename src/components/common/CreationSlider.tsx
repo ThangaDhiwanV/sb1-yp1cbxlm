@@ -3,7 +3,7 @@ import { X, Download, Library, FileCode, Minimize2, Maximize2, Upload, FileText 
 import { toast } from 'sonner';
 import Button from './Button';
 import Card from './Card';
-import { cn } from '../utils/cn';
+import { cn } from '../../utils/cn';
 
 interface CreationSliderProps {
     isOpen: boolean;
