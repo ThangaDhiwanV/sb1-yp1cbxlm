@@ -4,7 +4,7 @@ import Models from './pages/Models';
 import Explorer from './pages/Explorer';
 import ProjectPage from './pages/ProjectPage';
 import Macrobs from './pages/Macros';
-import VC from './pages/VB';
+import VB from './pages/VB';
 import TreeDemo from './pages/TreeDemo';
 
 const AppRoutes = () => {
@@ -16,7 +16,7 @@ const AppRoutes = () => {
             <Route path="/explorer/:id" element={<Explorer />} />
             <Route path="/explorer/:id/:fileType/:fileId" element={<Explorer />} />
             <Route path="/macrobs" element={<Macrobs />} />
-            <Route path="/vc" element={<VC />} />
+            <Route path="/vb" element={<VB />} />
             <Route path="/tree-demo" element={<TreeDemo />} />
             <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
