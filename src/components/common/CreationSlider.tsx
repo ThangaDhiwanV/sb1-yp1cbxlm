@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { X, Download, Library, FileCode, Minimize2, Maximize2, Upload } from 'lucide-react';
+import { X, Download, Library, FileCode, Minimize2, Maximize2, Upload, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import Button from './Button';
 import Card from './Card';
+import { cn } from '../utils/cn';
 
 interface CreationSliderProps {
     isOpen: boolean;
@@ -441,47 +442,45 @@ class InstrumentDriver {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                                            Select Instrument Document or Upload File
+                                            Select Instrument Document
                                         </label>
-                                        <div className="space-y-4">
+                                        <div className="relative">
                                             <select
                                                 value={halData.document as DocumentType}
                                                 onChange={(e) => handleDocumentSelect(e.target.value as DocumentType)}
-                                                className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary-500"
+                                                className="w-full p-2 pr-20 border rounded-md focus:ring-2 focus:ring-primary-500"
                                             >
                                                 <option value="">Choose document...</option>
                                                 {documents.map(doc => (
                                                     <option key={doc} value={doc}>{doc}</option>
                                                 ))}
                                             </select>
-
-                                            <div className="flex items-center">
-                                                <span className="flex-grow border-t border-gray-300"></span>
-                                                <span className="px-3 text-sm text-gray-500">OR</span>
-                                                <span className="flex-grow border-t border-gray-300"></span>
-                                            </div>
-
-                                            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative group cursor-pointer">
-                                                <div className="space-y-1 text-center">
-                                                    <Upload className="mx-auto h-12 w-12 text-gray-400 group-hover:text-primary-500 transition-colors" />
-                                                    <div className="flex text-sm text-gray-600">
-                                                        <label className="relative cursor-pointer bg-white rounded-md font-medium text-primary-600 hover:text-primary-500">
-                                                            <span>Upload a file</span>
-                                                            <input
-                                                                type="file"
-                                                                className="sr-only"
-                                                                onChange={handleFileChange}
-                                                                accept=".pdf,.doc,.docx,.txt"
-                                                            />
-                                                        </label>
-                                                    </div>
-                                                    {halData.uploadedFile && (
-                                                        <p className="text-sm text-gray-500">{halData.uploadedFile.name}</p>
-                                                    )}
-                                                    <p className="text-xs text-gray-500">PDF, DOC, or TXT up to 10MB</p>
-                                                </div>
+                                            <div className="absolute right-1 top-1 bottom-1 flex items-center">
+                                                <label className={cn(
+                                                    "px-3 py-1 rounded-md cursor-pointer",
+                                                    "bg-gray-50 hover:bg-gray-100",
+                                                    "border border-gray-200",
+                                                    "text-sm text-gray-600 hover:text-gray-900",
+                                                    "transition-colors duration-200",
+                                                    "flex items-center gap-1"
+                                                )}>
+                                                    <Upload className="h-4 w-4" />
+                                                    <span className="text-xs">Upload</span>
+                                                    <input
+                                                        type="file"
+                                                        className="sr-only"
+                                                        onChange={handleFileChange}
+                                                        accept=".pdf,.doc,.docx,.txt"
+                                                    />
+                                                </label>
                                             </div>
                                         </div>
+                                        {halData.uploadedFile && (
+                                            <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                                                <FileText className="h-4 w-4" />
+                                                <span>{halData.uploadedFile.name}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ) : (
