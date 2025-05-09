@@ -49,10 +49,19 @@ export const getInstruments = async (params: PaginationParams): Promise<Paginate
       // Apply sorting
       if (params.sortBy) {
         filteredInstruments.sort((a: any, b: any) => {
-          const aVal = a[params.sortBy!];
-          const bVal = b[params.sortBy!];
+          let aVal = a[params.sortBy!];
+          let bVal = b[params.sortBy!];
+          
+          // Handle numeric sorting for driverCount
+          if (params.sortBy === 'driverCount') {
+            aVal = aVal || 0;
+            bVal = bVal || 0;
+          }
+          
           const order = params.sortOrder === 'desc' ? -1 : 1;
-          return aVal > bVal ? order : -order;
+          if (aVal < bVal) return -1 * order;
+          if (aVal > bVal) return 1 * order;
+          return 0;
         });
       }
 

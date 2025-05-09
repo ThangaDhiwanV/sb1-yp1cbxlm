@@ -1,7 +1,7 @@
 import React from 'react';
 import InstrumentCard from './InstrumentCard';
 import { Instrument } from '../../types';
-import { Filter, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight, Search, ArrowDown, ArrowUp } from 'lucide-react';
 import Button from '../common/Button';
 import { cn } from '../../utils/cn';
 
@@ -55,6 +55,11 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
   };
 
   const uniqueTypes = Array.from(new Set(instruments.map(inst => inst.type))).sort();
+
+  const getSortIcon = (field: string) => {
+    if (sortBy !== field) return null;
+    return sortOrder === 'asc' ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
+  };
 
   return (
     <div className="space-y-4">
@@ -111,22 +116,32 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
         </div>
 
         {/* Sort */}
-        <select
-          className={cn(
-            "w-[200px]",
-            "px-3 py-2 text-sm rounded-lg",
-            "bg-gray-50/50 border border-gray-200",
-            "text-gray-900",
-            "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
-            "transition-all duration-200"
-          )}
-          onChange={(e) => handleSort(e.target.value)}
-          value={sortBy || ''}
-        >
-          <option value="">Sort by</option>
-          <option value="name">Name</option>
-          <option value="driverCount">Number of Drivers</option>
-        </select>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleSort('name')}
+            className={cn(
+              "min-w-[120px]",
+              sortBy === 'name' && 'bg-primary-50 border-primary-200'
+            )}
+          >
+            <span>Name</span>
+            {getSortIcon('name')}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handleSort('driverCount')}
+            className={cn(
+              "min-w-[120px]",
+              sortBy === 'driverCount' && 'bg-primary-50 border-primary-200'
+            )}
+          >
+            <span>Drivers</span>
+            {getSortIcon('driverCount')}
+          </Button>
+        </div>
 
         {/* Pagination */}
         <div className="flex items-center gap-2">
