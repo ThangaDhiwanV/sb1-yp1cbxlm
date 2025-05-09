@@ -9,7 +9,7 @@ import VB from './pages/VB';
 const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Explorer />} />
+      <Route path="/" element={<Navigate to="/project" replace />} />
       <Route path="/project" element={<ProjectPage />} />
       <Route path="/instruments" element={<InstrumentsPage />} />
       <Route path="/models/:instrumentId" element={<ModelsPage />} />
@@ -18,7 +18,7 @@ const AppRoutes = () => {
       <Route path="/explorer/:id/:fileType/:fileId" element={<Explorer />} />
       <Route path="/macros" element={<Macros />} />
       <Route path="/virtual-bench" element={<VB />} />
-      <Route path="*" element={<Navigate to="/" replace />} />
+      <Route path="*" element={<Navigate to="/project" replace />} />
     </Routes>
   );
 };
