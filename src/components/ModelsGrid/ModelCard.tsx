@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FileText, Book, Layout, Clock } from 'lucide-react';
 import { Model } from '../../types';
 import { cn } from '../../utils/cn';
-import { openModelPanel } from '../../api/instrumentService';
+import { openModelPanel } from '../../api/modelService';
 import { toast } from 'sonner';
 import Card, { CardContent } from '../common/Card';
 
