@@ -214,18 +214,18 @@ const Explorer: React.FC = () => {
 
     const breadcrumbItems = [
         { label: 'Project', href: '/' },
-        { label: 'All Instruments', href: '/instruments' },
         { label: 'Explorer' }
     ];
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
-            <div className="flex-none p-3 border-b border-gray-200 bg-white">
-                <div className="max-w-7xl mx-auto">
+            <div className="flex-none border-b border-gray-200 bg-white">
+                <div className="max-w-screen-2xl mx-auto px-4 py-2">
                     <div className="flex justify-between items-center">
                         <Breadcrumbs items={breadcrumbItems} />
                         <Button
                             onClick={() => setIsCreationSliderOpen(true)}
+                            size="sm"
                             className="flex items-center gap-2"
                         >
                             <Wrench className="h-4 w-4" />
@@ -235,67 +235,64 @@ const Explorer: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden p-3 gap-3 max-w-7xl mx-auto w-full">
-                <div className="w-72 flex-shrink-0">
-                    <div className="mb-3">
-                        <div className="relative">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder="Search files..."
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className={cn(
-                                    "w-full pl-10 pr-4 py-2 rounded-lg",
-                                    "border border-gray-200",
-                                    "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
-                                    "placeholder:text-gray-400 text-sm"
-                                )}
-                            />
-                        </div>
+            <div className="flex flex-1 overflow-hidden max-w-screen-2xl mx-auto w-full p-4 gap-4">
+                <div className="w-72 flex-shrink-0 flex flex-col gap-2">
+                    <div className="relative">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Search files..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className={cn(
+                                "w-full pl-9 pr-3 py-1.5 rounded-lg",
+                                "border border-gray-200",
+                                "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+                                "placeholder:text-gray-400 text-sm"
+                            )}
+                        />
                     </div>
                     
-                    {loading ? (
-                        <div className="p-3">
-                            <div className="animate-pulse space-y-2">
-                                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-                                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                    <div className="flex-1 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+                        {loading ? (
+                            <div className="p-2">
+                                <div className="animate-pulse space-y-2">
+                                    <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                                </div>
                             </div>
-                        </div>
-                    ) : error ? (
-                        <div className="p-3 text-red-500">{error}</div>
-                    ) : (
-                        <TreeView
-                            data={treeData}
-                            expanded={expandedNodes}
-                            selected={selectedNode?.id}
-                            onNodeClick={handleNodeClick}
-                            onNodeToggle={handleNodeToggle}
-                        />
-                    )}
+                        ) : error ? (
+                            <div className="p-2 text-red-500">{error}</div>
+                        ) : (
+                            <TreeView
+                                data={treeData}
+                                expanded={expandedNodes}
+                                selected={selectedNode?.id}
+                                onNodeClick={handleNodeClick}
+                                onNodeToggle={handleNodeToggle}
+                            />
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex-1 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
                     {fileLoading ? (
                         <div className="h-full flex items-center justify-center">
-                            <div className="text-center">
-                                <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-500 mb-4"></div>
-                                <p className="text-sm text-gray-500">Loading file content...</p>
-                            </div>
+                            <div className="animate-spin h-5 w-5 border-2 border-primary-500 border-t-transparent rounded-full"></div>
                         </div>
                     ) : selectedNode ? (
                         <div className="h-full flex flex-col">
-                            <div className="flex items-center justify-between p-3 border-b bg-gray-50/50">
-                                <span className="text-sm font-medium text-gray-900">{selectedNode.label}</span>
+                            <div className="flex items-center justify-between px-3 py-2 border-b bg-gray-50/50">
+                                <span className="text-sm font-medium text-gray-700">{selectedNode.label}</span>
                                 {selectedNode.type === 'file' && !selectedNode.error && (
                                     <div className="flex items-center gap-2">
                                         <Button
                                             onClick={() => setIsEditing(true)}
                                             size="sm"
+                                            variant="outline"
                                             className="flex items-center gap-1.5"
                                         >
-                                            <Edit2 className="h-4 w-4" />
+                                            <Edit2 className="h-3.5 w-3.5" />
                                             Edit
                                         </Button>
                                         <Button
@@ -304,7 +301,7 @@ const Explorer: React.FC = () => {
                                             size="sm"
                                             className="flex items-center gap-1.5"
                                         >
-                                            <Download className="h-4 w-4" />
+                                            <Download className="h-3.5 w-3.5" />
                                             Download
                                         </Button>
                                     </div>
@@ -319,10 +316,8 @@ const Explorer: React.FC = () => {
                             />
                         </div>
                     ) : (
-                        <div className="h-full flex items-center justify-center">
-                            <div className="text-center text-gray-500">
-                                <p>Select a file to view its content</p>
-                            </div>
+                        <div className="h-full flex items-center justify-center text-gray-500 text-sm">
+                            Select a file to view its content
                         </div>
                     )}
                 </div>
