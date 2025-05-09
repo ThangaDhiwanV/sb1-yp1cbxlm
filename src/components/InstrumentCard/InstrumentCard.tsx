@@ -81,16 +81,22 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
         <div
           onClick={handleIconClick}
           className={cn(
-            'p-3 rounded-lg transition-colors cursor-pointer',
+            'p-2.5 rounded-lg transition-all duration-200',
             'bg-white/80 hover:bg-white',
-            'border border-gray-200 shadow-sm'
+            'border border-primary-100/60 hover:border-primary-300/60',
+            'shadow-sm hover:shadow-md',
+            'cursor-pointer'
           )}
         >
-          <Icon className="h-6 w-6 text-gray-600" />
+          <Icon className="h-5 w-5 text-primary-600" />
         </div>
-        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 -translate-y-full z-10
-                opacity-0 group-hover:opacity-100 transition-opacity
-                bg-gray-800 text-white text-sm px-3 py-1.5 rounded-md whitespace-nowrap">
+        <div className={cn(
+          'absolute -top-8 left-1/2 transform -translate-x-1/2',
+          'px-2 py-1 rounded-md text-xs font-medium',
+          'bg-gray-800 text-white whitespace-nowrap',
+          'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
+          'pointer-events-none z-10'
+        )}>
           {label}
         </div>
       </div>
@@ -102,40 +108,43 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
   return (
     <Card
       className={cn(
-        'transform transition-all duration-200 hover:scale-[1.02] min-h-[200px]',
-        'bg-gradient-to-br',
-        instrument.type === 'SMU'
-          ? 'from-yellow-50 to-amber-50 hover:from-yellow-100 hover:to-amber-100'
-          : instrument.type === 'DMM'
-            ? 'from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100'
-            : 'from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100'
+        'transform transition-all duration-200 hover:scale-[1.02]',
+        'bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50',
+        'hover:from-white hover:via-primary-100/40 hover:to-secondary-200/60',
+        'border-2 border-primary-200/30 hover:border-primary-300/50',
+        'shadow-lg shadow-primary-100/20 hover:shadow-xl hover:shadow-primary-200/30'
       )}
       onClick={handleClick}
     >
-      <CardContent>
-        <div className="mb-6">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <InstrumentIcon className="h-5 w-5 text-gray-700" />
-                <h3 className="font-medium text-gray-900">{instrument.name}</h3>
-              </div>
+      <CardContent className="p-4">
+        <div className="flex flex-col gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
               <div className={cn(
-                'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm',
-                'bg-gray-100/80 text-gray-700 w-fit'
+                'p-2 rounded-lg',
+                'bg-gradient-to-br from-primary-50 to-primary-100/50',
+                'border border-primary-200/30'
               )}>
-                <FileArchive className="h-4 w-4 text-gray-600" />
-                <span>{instrument.driverCount || 0} Available Driver{instrument.driverCount !== 1 ? 's' : ''}</span>
+                <InstrumentIcon className="h-5 w-5 text-primary-600" />
               </div>
+              <h3 className="font-medium text-gray-900">{instrument.name}</h3>
+            </div>
+            <div className={cn(
+              'flex items-center gap-2 px-3 py-1.5 rounded-lg w-fit',
+              'bg-primary-50/80 text-primary-700',
+              'border border-primary-100/60'
+            )}>
+              <FileArchive className="h-4 w-4 text-primary-600" />
+              <span className="text-sm">{instrument.driverCount || 0} Available Driver{instrument.driverCount !== 1 ? 's' : ''}</span>
             </div>
           </div>
-        </div>
 
-        <div className="flex justify-between items-center px-4">
-          <IconButton icon={BookOpen} label="Documentation" viewType="documentation" />
-          <IconButton icon={Code2} label="HAL" viewType="hal" />
-          <IconButton icon={FileText} label="API" viewType="api" />
-          <IconButton icon={Layout} label="Panel" viewType="panel" />
+          <div className="flex justify-between items-center border-t border-primary-200/40 pt-3 mt-1">
+            <IconButton icon={BookOpen} label="Documentation" viewType="documentation" />
+            <IconButton icon={Code2} label="HAL" viewType="hal" />
+            <IconButton icon={FileText} label="API" viewType="api" />
+            <IconButton icon={Layout} label="Panel" viewType="panel" />
+          </div>
         </div>
       </CardContent>
     </Card>
