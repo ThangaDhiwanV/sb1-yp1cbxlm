@@ -32,7 +32,6 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
 
   const checkAndNavigate = async (viewType: 'hal' | 'api' | 'documentation' | 'panel') => {
     try {
-      // Check if the selected feature is available
       let isAvailable = false;
       let errorMessage = "";
 
@@ -60,7 +59,6 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
         return;
       }
 
-      // Navigate to explorer with the specific section
       navigate(`/explorer/${instrument.type}`, {
         state: {
           fileType: viewType,
