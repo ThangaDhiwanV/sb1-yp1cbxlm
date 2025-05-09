@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Database, Microscope, Boxes, Settings, FolderTree } from 'lucide-react';
+import { FolderTree, Home, Boxes, Database, Microscope, Settings, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
 
@@ -15,6 +15,7 @@ const navItems = [
 const SideNav: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const userName = "JOHN DOE"; // This would typically come from your auth context/state
 
     return (
         <>
@@ -28,20 +29,28 @@ const SideNav: React.FC = () => {
                     "text-xl font-bold tracking-tight",
                     "bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent"
                 )}>
-                    Instrument Hub
+                    Instrument 360
                 </h1>
-                <Tooltip content="Settings" placement="left">
-                    <button
-                        onClick={() => navigate('/settings')}
-                        className={cn(
-                            "p-2 rounded-lg transition-all duration-200",
-                            "hover:bg-gray-100 active:bg-gray-200",
-                            "focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                        )}
-                    >
-                        <Settings className="w-5 h-5 text-gray-600" />
-                    </button>
-                </Tooltip>
+                
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
+                        <User className="w-4 h-4 text-gray-500" />
+                        <span className="text-sm font-medium text-gray-700">{userName}</span>
+                    </div>
+                    <Tooltip content="Settings" placement="left">
+                        <button
+                            onClick={() => navigate('/settings')}
+                            className={cn(
+                                "p-2 rounded-lg transition-all duration-200",
+                                "text-gray-600 hover:text-primary-600",
+                                "hover:bg-primary-50",
+                                "focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                            )}
+                        >
+                            <Settings className="w-5 h-5" />
+                        </button>
+                    </Tooltip>
+                </div>
             </header>
 
             <nav className={cn(
@@ -64,11 +73,11 @@ const SideNav: React.FC = () => {
                                                 "w-full p-2.5 rounded-lg",
                                                 "transition-all duration-200",
                                                 "group relative",
-                                                "hover:bg-primary-50/80",
-                                                "active:bg-primary-100/80",
+                                                "hover:bg-primary-50 hover:text-primary-600",
+                                                "active:bg-primary-100",
                                                 "focus:outline-none focus:ring-2 focus:ring-primary-500/20",
                                                 isActive && cn(
-                                                    "bg-primary-50",
+                                                    "bg-primary-50 text-primary-600",
                                                     "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
                                                     "before:w-0.5 before:h-5 before:bg-primary-500",
                                                     "before:rounded-r-full"
