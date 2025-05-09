@@ -31,6 +31,7 @@ const Explorer: React.FC = () => {
     const [fileLoading, setFileLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const { setIsCreationSliderOpen } = useCreationContext();
+    const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
         const loadData = async () => {
@@ -219,9 +220,9 @@ const Explorer: React.FC = () => {
 
     return (
         <div className="flex flex-col h-screen bg-gray-50">
-            <div className="flex-none p-6 border-b border-gray-200 bg-white">
+            <div className="flex-none p-3 border-b border-gray-200 bg-white">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-center">
                         <Breadcrumbs items={breadcrumbItems} />
                         <Button
                             onClick={() => setIsCreationSliderOpen(true)}
@@ -234,14 +235,16 @@ const Explorer: React.FC = () => {
                 </div>
             </div>
 
-            <div className="flex flex-1 overflow-hidden p-6 gap-6 max-w-7xl mx-auto w-full">
-                <div className="w-80 flex-shrink-0">
-                    <div className="mb-4">
+            <div className="flex flex-1 overflow-hidden p-3 gap-3 max-w-7xl mx-auto w-full">
+                <div className="w-72 flex-shrink-0">
+                    <div className="mb-3">
                         <div className="relative">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                             <input
                                 type="text"
                                 placeholder="Search files..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
                                 className={cn(
                                     "w-full pl-10 pr-4 py-2 rounded-lg",
                                     "border border-gray-200",
@@ -253,7 +256,7 @@ const Explorer: React.FC = () => {
                     </div>
                     
                     {loading ? (
-                        <div className="p-4">
+                        <div className="p-3">
                             <div className="animate-pulse space-y-2">
                                 <div className="h-4 bg-gray-200 rounded w-3/4"></div>
                                 <div className="h-4 bg-gray-200 rounded w-1/2"></div>
@@ -261,7 +264,7 @@ const Explorer: React.FC = () => {
                             </div>
                         </div>
                     ) : error ? (
-                        <div className="p-4 text-red-500">{error}</div>
+                        <div className="p-3 text-red-500">{error}</div>
                     ) : (
                         <TreeView
                             data={treeData}
@@ -283,7 +286,7 @@ const Explorer: React.FC = () => {
                         </div>
                     ) : selectedNode ? (
                         <div className="h-full flex flex-col">
-                            <div className="flex items-center justify-between p-4 border-b bg-gray-50/50">
+                            <div className="flex items-center justify-between p-3 border-b bg-gray-50/50">
                                 <span className="text-sm font-medium text-gray-900">{selectedNode.label}</span>
                                 {selectedNode.type === 'file' && !selectedNode.error && (
                                     <div className="flex items-center gap-2">
