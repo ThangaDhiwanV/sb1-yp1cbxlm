@@ -60,10 +60,10 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
     <div className="space-y-4">
       <div className={cn(
         'flex items-center justify-between gap-4',
-        'bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50',
+        'bg-white',
         'p-4 rounded-xl',
-        'border-2 border-primary-200/30',
-        'shadow-lg shadow-primary-100/20'
+        'border border-gray-200',
+        'shadow-sm'
       )}>
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -75,7 +75,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
             className={cn(
               "block w-full pl-10 pr-3 py-2 text-sm",
               "rounded-lg",
-              "bg-white border border-primary-200/60",
+              "bg-gray-50/50 border border-gray-200",
               "text-gray-900 placeholder:text-gray-500",
               "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
               "transition-all duration-200"
@@ -95,7 +95,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
             className={cn(
               "block w-full pl-10 pr-3 py-2 text-sm",
               "rounded-lg",
-              "bg-white border border-primary-200/60",
+              "bg-gray-50/50 border border-gray-200",
               "text-gray-900",
               "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
               "transition-all duration-200"
@@ -115,7 +115,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
           className={cn(
             "w-[200px]",
             "px-3 py-2 text-sm rounded-lg",
-            "bg-white border border-primary-200/60",
+            "bg-gray-50/50 border border-gray-200",
             "text-gray-900",
             "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
             "transition-all duration-200"
@@ -137,7 +137,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
             disabled={currentPage <= 1 || loading}
             className={cn(
               "min-w-[32px] h-8",
-              "border-primary-200/60 hover:border-primary-300/60",
+              "border-gray-200 hover:border-primary-300",
               "hover:bg-primary-50"
             )}
           >
@@ -151,7 +151,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
               className={cn(
                 "w-14 py-1.5 px-2 text-sm text-center",
                 "rounded-lg",
-                "bg-white border border-primary-200/60",
+                "bg-gray-50/50 border border-gray-200",
                 "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
                 "transition-all duration-200"
               )}
@@ -166,7 +166,7 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
             disabled={currentPage >= totalPages || loading}
             className={cn(
               "min-w-[32px] h-8",
-              "border-primary-200/60 hover:border-primary-300/60",
+              "border-gray-200 hover:border-primary-300",
               "hover:bg-primary-50"
             )}
           >
@@ -185,9 +185,9 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
       {instruments.length === 0 && !loading && (
         <div className={cn(
           "flex flex-col items-center justify-center py-8 rounded-xl",
-          "bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50",
-          "border-2 border-primary-200/30",
-          "shadow-lg shadow-primary-100/20"
+          "bg-white",
+          "border border-gray-200",
+          "shadow-sm"
         )}>
           <p className="text-gray-600 text-sm mb-1">No instruments found</p>
           <p className="text-gray-500 text-xs">Try adjusting your search criteria</p>
@@ -197,9 +197,9 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
       {loading && (
         <div className={cn(
           "flex items-center justify-center py-8 rounded-xl",
-          "bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50",
-          "border-2 border-primary-200/30",
-          "shadow-lg shadow-primary-100/20"
+          "bg-white",
+          "border border-gray-200",
+          "shadow-sm"
         )}>
           <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
         </div>
