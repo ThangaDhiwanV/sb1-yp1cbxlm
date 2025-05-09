@@ -44,8 +44,11 @@ const Tooltip: React.FC<TooltipProps> = ({
         onOpenChange: setIsOpen,
         middleware: [
             offset(8),
-            flip(),
-            shift(),
+            flip({
+                fallbackAxisSideDirection: 'start',
+                padding: 8
+            }),
+            shift({ padding: 8 }),
             arrow({ element: arrowRef }),
         ],
         whileElementsMounted: autoUpdate,
@@ -72,15 +75,19 @@ const Tooltip: React.FC<TooltipProps> = ({
                 <FloatingPortal>
                     <div
                         ref={refs.setFloating}
-                        style={floatingStyles}
+                        style={{
+                            ...floatingStyles,
+                            zIndex: 50,
+                        }}
                         {...getFloatingProps()}
                         className={cn(
-                            'z-50 animate-in fade-in-0 zoom-in-95',
-                            'px-2.5 py-1.5 rounded-md',
+                            'animate-in fade-in-0 zoom-in-95',
+                            'px-3 py-2 rounded-lg',
                             'text-xs font-medium text-white',
                             'bg-gray-900/90 backdrop-blur-sm',
-                            'shadow-md shadow-gray-900/10',
-                            'max-w-[250px] text-center',
+                            'shadow-lg shadow-gray-900/10',
+                            'max-w-[300px] text-center',
+                            'border border-gray-800/20',
                             className
                         )}
                     >
@@ -88,11 +95,12 @@ const Tooltip: React.FC<TooltipProps> = ({
                         <div
                             ref={arrowRef}
                             className={cn(
-                                'absolute rotate-45 w-2 h-2 bg-gray-900/90',
-                                placement.includes('top') && 'bottom-0 -translate-y-1',
-                                placement.includes('bottom') && 'top-0 translate-y-1',
-                                placement.includes('left') && 'right-0 translate-x-1',
-                                placement.includes('right') && 'left-0 -translate-x-1'
+                                'absolute rotate-45 w-2 h-2',
+                                'bg-gray-900/90 border-gray-800/20',
+                                placement.includes('top') && 'bottom-0 -translate-y-1 border-b border-r',
+                                placement.includes('bottom') && 'top-0 translate-y-1 border-t border-l',
+                                placement.includes('left') && 'right-0 translate-x-1 border-t border-r',
+                                placement.includes('right') && 'left-0 -translate-x-1 border-b border-l'
                             )}
                         />
                     </div>
