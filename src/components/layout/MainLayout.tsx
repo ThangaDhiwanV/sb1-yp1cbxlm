@@ -13,8 +13,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children, className }) => {
             <SideNav />
             <main className={cn(
                 'transition-all duration-300',
-                'pt-20 px-6', // Increased top padding to account for header height (14px + extra space)
-                'ml-16', // Match the sidebar width
+                'pt-16 px-4', // Reduced padding
+                'ml-20', // Match the sidebar width
                 className
             )}>
                 {children}

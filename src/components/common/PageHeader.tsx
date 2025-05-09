@@ -19,13 +19,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     className,
 }) => {
     return (
-        <div className={cn('mb-8 space-y-4', className)}>
-            {breadcrumbs && <Breadcrumbs items={breadcrumbs} className="mb-6" />}
+        <div className={cn('mb-4', className)}> {/* Reduced margin */}
+            {breadcrumbs && <Breadcrumbs items={breadcrumbs} className="mb-3" />} {/* Reduced margin */}
 
-            <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1.5">
+            <div className="flex items-start justify-between gap-3"> {/* Reduced gap */}
+                <div className="space-y-1">
                     <h1 className={cn(
-                        "text-2xl font-semibold leading-tight",
+                        "text-xl font-semibold leading-tight", // Reduced text size
                         "bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent"
                     )}>
                         {title}
@@ -38,14 +38,13 @@ const PageHeader: React.FC<PageHeaderProps> = ({
                 </div>
 
                 {actions && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2"> {/* Reduced gap */}
                         {actions}
                     </div>
                 )}
             </div>
 
-            {/* Gradient Separator */}
-            <div className="h-px w-full bg-gradient-to-r from-primary-100/50 via-secondary-200/50 to-transparent" />
+            <div className="h-px w-full bg-gradient-to-r from-primary-100/50 via-secondary-200/50 to-transparent mt-3" /> {/* Reduced margin */}
         </div>
     );
 };

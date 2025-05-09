@@ -42,10 +42,10 @@ const ModelsGrid: React.FC<ModelsGridProps> = ({
     };
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-4"> {/* Reduced spacing */}
             <div className={cn(
-                'flex items-center justify-between gap-6',
-                'bg-white/80 backdrop-blur-sm p-4 rounded-xl',
+                'flex items-center justify-between gap-4',
+                'bg-white/80 backdrop-blur-sm p-3 rounded-lg', // Reduced padding
                 'border border-gray-200/60 shadow-sm'
             )}>
                 {/* Search */}
@@ -56,7 +56,7 @@ const ModelsGrid: React.FC<ModelsGridProps> = ({
                     <input
                         type="text"
                         className={cn(
-                            "block w-full pl-10 pr-3 py-2.5 text-sm",
+                            "block w-full pl-10 pr-3 py-2 text-sm",
                             "border border-gray-200 rounded-lg",
                             "bg-gray-50/50",
                             "placeholder:text-gray-500",
@@ -70,7 +70,7 @@ const ModelsGrid: React.FC<ModelsGridProps> = ({
                 </div>
 
                 {/* Pagination */}
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     <Button
                         variant="outline"
                         size="sm"
@@ -116,7 +116,7 @@ const ModelsGrid: React.FC<ModelsGridProps> = ({
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-fr"> {/* Reduced gap */}
                 {models.map((model) => (
                     <div key={model.id} className="h-fit animate-fade-in">
                         <ModelCard model={model} />
@@ -127,11 +127,11 @@ const ModelsGrid: React.FC<ModelsGridProps> = ({
             {/* Empty State */}
             {models.length === 0 && !loading && (
                 <div className={cn(
-                    "flex flex-col items-center justify-center py-16 rounded-xl",
+                    "flex flex-col items-center justify-center py-8 rounded-lg", // Reduced padding
                     "bg-gradient-to-br from-white via-gray-50 to-primary-50/20",
                     "border border-gray-200/60"
                 )}>
-                    <p className="text-gray-500 text-sm mb-2">No models found</p>
+                    <p className="text-gray-500 text-sm mb-1">No models found</p>
                     <p className="text-gray-400 text-xs">Try adjusting your search criteria</p>
                 </div>
             )}
@@ -139,7 +139,7 @@ const ModelsGrid: React.FC<ModelsGridProps> = ({
             {/* Loading State */}
             {loading && (
                 <div className={cn(
-                    "flex items-center justify-center py-16 rounded-xl",
+                    "flex items-center justify-center py-8 rounded-lg", // Reduced padding
                     "bg-gradient-to-br from-white via-gray-50 to-primary-50/20",
                     "border border-gray-200/60"
                 )}>
