@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import Card, { CardContent } from '../common/Card';
 import { Instrument } from '../../types';
 import { cn } from '../../utils/cn';
+import Tooltip from '../common/Tooltip';
 
 interface InstrumentCardProps {
   instrument: Instrument;
@@ -79,8 +80,8 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
     const tooltipLabel = viewType === 'api' ? 'API' : label;
 
     return (
-      <div className="group relative">
-        <div
+      <Tooltip content={tooltipLabel} placement="top">
+        <button
           onClick={handleIconClick}
           className={cn(
             'p-2.5 rounded-lg transition-all duration-200',
@@ -91,18 +92,8 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
           )}
         >
           <Icon className="h-5 w-5 text-primary-600" />
-        </div>
-        <div className={cn(
-          'absolute -top-9 left-1/2 transform -translate-x-1/2',
-          'px-3 py-1.5 rounded-lg text-xs font-medium',
-          'bg-gray-900/90 text-white whitespace-nowrap',
-          'opacity-0 group-hover:opacity-100 transition-opacity duration-200',
-          'pointer-events-none z-10',
-          'backdrop-blur-sm shadow-lg'
-        )}>
-          {tooltipLabel}
-        </div>
-      </div>
+        </button>
+      </Tooltip>
     );
   };
 
