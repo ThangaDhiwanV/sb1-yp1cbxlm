@@ -82,8 +82,8 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
           onClick={handleIconClick}
           className={cn(
             'p-2.5 rounded-lg transition-all duration-200',
-            'bg-white/80 hover:bg-white',
-            'border border-primary-100/60 hover:border-primary-300/60',
+            'bg-white hover:bg-primary-50',
+            'border border-primary-100 hover:border-primary-300',
             'shadow-sm hover:shadow-md',
             'cursor-pointer'
           )}
@@ -105,14 +105,27 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
 
   const InstrumentIcon = getInstrumentIcon(instrument.type);
 
+  const getCardGradient = (type: string) => {
+    switch (type) {
+      case 'SMU':
+        return 'from-amber-50 via-orange-50 to-yellow-50 hover:from-amber-100 hover:via-orange-100 hover:to-yellow-100';
+      case 'DMM':
+        return 'from-blue-50 via-indigo-50 to-violet-50 hover:from-blue-100 hover:via-indigo-100 hover:to-violet-100';
+      case 'Power Supply':
+        return 'from-emerald-50 via-green-50 to-teal-50 hover:from-emerald-100 hover:via-green-100 hover:to-teal-100';
+      default:
+        return 'from-rose-50 via-pink-50 to-fuchsia-50 hover:from-rose-100 hover:via-pink-100 hover:to-fuchsia-100';
+    }
+  };
+
   return (
     <Card
       className={cn(
         'transform transition-all duration-200 hover:scale-[1.02]',
-        'bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50',
-        'hover:from-white hover:via-primary-100/40 hover:to-secondary-200/60',
-        'border-2 border-primary-200/30 hover:border-primary-300/50',
-        'shadow-lg shadow-primary-100/20 hover:shadow-xl hover:shadow-primary-200/30'
+        'bg-gradient-to-br',
+        getCardGradient(instrument.type),
+        'border-2 border-white/80 hover:border-white',
+        'shadow-xl shadow-gray-200/50 hover:shadow-2xl hover:shadow-gray-300/50'
       )}
       onClick={handleClick}
     >
@@ -122,8 +135,8 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
             <div className="flex items-center gap-2 mb-2">
               <div className={cn(
                 'p-2 rounded-lg',
-                'bg-gradient-to-br from-primary-50 to-primary-100/50',
-                'border border-primary-200/30'
+                'bg-white/80 backdrop-blur-sm',
+                'border border-white/60'
               )}>
                 <InstrumentIcon className="h-5 w-5 text-primary-600" />
               </div>
@@ -131,15 +144,15 @@ const InstrumentCard: React.FC<InstrumentCardProps> = ({ instrument }) => {
             </div>
             <div className={cn(
               'flex items-center gap-2 px-3 py-1.5 rounded-lg w-fit',
-              'bg-primary-50/80 text-primary-700',
-              'border border-primary-100/60'
+              'bg-white/80 backdrop-blur-sm text-primary-700',
+              'border border-white/60'
             )}>
               <FileArchive className="h-4 w-4 text-primary-600" />
               <span className="text-sm">{instrument.driverCount || 0} Available Driver{instrument.driverCount !== 1 ? 's' : ''}</span>
             </div>
           </div>
 
-          <div className="flex justify-between items-center border-t border-primary-200/40 pt-3 mt-1">
+          <div className="flex justify-between items-center border-t border-white/60 pt-3 mt-1">
             <IconButton icon={BookOpen} label="Documentation" viewType="documentation" />
             <IconButton icon={Code2} label="HAL" viewType="hal" />
             <IconButton icon={FileText} label="API" viewType="api" />
