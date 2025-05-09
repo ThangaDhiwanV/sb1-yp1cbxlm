@@ -23,13 +23,6 @@ function App() {
   return (
     <Router>
       <CreationContext.Provider value={{ isCreationSliderOpen, setIsCreationSliderOpen }}>
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-          expand={false}
-          className="toaster-compact"
-        />
         <MainLayout>
           <AppRoutes />
           <CreationSlider
@@ -37,6 +30,13 @@ function App() {
             onClose={() => setIsCreationSliderOpen(false)}
           />
         </MainLayout>
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          expand={false}
+          className="toaster-compact"
+        />
       </CreationContext.Provider>
     </Router>
   );
