@@ -1,8 +1,10 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, FolderTree, Microscope, Database, Boxes, User } from 'lucide-react';
+import { Home, FolderTree, Microscope, Database, Boxes, User, Sparkles } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
+import Button from '../common/Button';
+import { useCreationContext } from '../../App';
 
 const navItems = [
     { id: 'project', label: 'Project', icon: Home, path: '/project' },
@@ -16,6 +18,7 @@ const SideNav: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const userName = "JOHN DOE";
+    const { setIsCreationSliderOpen } = useCreationContext();
 
     return (
         <>
@@ -32,7 +35,16 @@ const SideNav: React.FC = () => {
                     Instrument 360
                 </h1>
                 
-                <div className="flex items-center">
+                <div className="flex items-center gap-4">
+                    <Button
+                        variant="gradient"
+                        onClick={() => setIsCreationSliderOpen(true)}
+                        className="px-6 py-2.5 rounded-xl"
+                    >
+                        <Sparkles className="h-5 w-5" />
+                        <span>Create HAL/Driver</span>
+                    </Button>
+
                     <button
                         className={cn(
                             "flex items-center gap-3 px-4 py-2 rounded-xl",

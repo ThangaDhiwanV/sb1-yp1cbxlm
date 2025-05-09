@@ -3,7 +3,7 @@ import { cn } from '../../utils/cn';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient';
   size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
   className?: string;
@@ -49,6 +49,16 @@ const Button: React.FC<ButtonProps> = ({
       'hover:bg-gray-100 focus:ring-gray-500',
       'shadow-none'
     ),
+    gradient: cn(
+      'relative overflow-hidden',
+      'bg-gradient-to-r from-primary-500 to-secondary-500',
+      'hover:from-primary-600 hover:to-secondary-600',
+      'text-white font-medium',
+      'shadow-lg shadow-primary-500/20',
+      'border border-white/20',
+      'hover:scale-[1.02] active:scale-[0.98]',
+      'group'
+    ),
   };
 
   const sizeClasses = {
@@ -72,6 +82,14 @@ const Button: React.FC<ButtonProps> = ({
     >
       {Icon && <Icon className="h-4 w-4" />}
       {children}
+      {variant === 'gradient' && (
+        <div className={cn(
+          "absolute inset-0",
+          "bg-gradient-to-r from-transparent via-white/20 to-transparent",
+          "translate-x-[-100%] group-hover:translate-x-[100%]",
+          "transition-transform duration-1000"
+        )} />
+      )}
     </button>
   );
 };
