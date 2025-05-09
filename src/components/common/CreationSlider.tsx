@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Download, Library, FileCode, Minimize2, Maximize2, Upload, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 import Button from './Button';
 import Card from './Card';
 import { cn } from '../../utils/cn';
 import LoadingOverlay from './LoadingOverlay';
+import { getTechStacks as getHalTechStacks, generateHal, addToLibrary as addHalToLibrary, downloadHal, downloadApi } from '../../api/halService';
+import { getTechStacks as getDriverTechStacks, getHalClasses, generateDriver, addToLibrary as addDriverToLibrary, downloadDriver } from '../../api/driverService';
 
 interface CreationSliderProps {
     isOpen: boolean;
@@ -43,7 +45,6 @@ interface HalData {
     uploadedFile: File | null;
 }
 
-const technologies = ['Python', 'TypeScript', 'C++', 'Java'];
 const documents = ['SCPI Manual', 'IVI Manual', 'Programming Guide', 'User Manual'] as const;
 const mockFunctions = [
     'initialize()',
@@ -95,6 +96,35 @@ const mockAbstractCode = {
 const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
     const [activeTab, setActiveTab] = useState<TabType>('hal');
     const [isGenerating, setIsGenerating] = useState(false);
+    const [techStacks, setTechStacks] = useState<string[]>([]);
+    const [halClasses, setHalClasses] = useState<string[]>([]);
+
+    useEffect(() => {
+        const loadTechStacks = async () => {
+            try {
+                const stacks = await (activeTab === 'hal' ? getHalTechStacks() : getDriverTechStacks());
+                setTechStacks(stacks);
+            } catch (error) {
+                console.error('Error loading tech stacks:', error);
+                toast.error('Failed to load technology stacks');
+            }
+        };
+
+        const loadHalClasses = async () => {
+            if (activeTab === 'driver') {
+                try {
+                    const classes = await getHalClasses();
+                    setHalClasses(classes);
+                } catch (error) {
+                    console.error('Error loading HAL classes:', error);
+                    toast.error('Failed to load HAL classes');
+                }
+            }
+        };
+
+        loadTechStacks();
+        loadHalClasses();
+    }, [activeTab]);
 
     const [halData, setHalData] = useState<HalData>({
         technology: '',
@@ -254,72 +284,157 @@ const CreationSlider: React.FC<CreationSliderProps> = ({ isOpen, onClose }) => {
         setIsGenerating(true);
         
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-
             if (activeTab === 'hal') {
-                const generatedCode = `// Generated HAL content for ${halData.document || halData.uploadedFile?.name}
-// Technology: ${halData.technology}
-
-class ${halData.document.replace(/\s+/g, '')}HAL {
-    constructor() {
-        this.initialized = false;
-    }
-
-    initialize() {
-        this.initialized = true;
-        return true;
-    }
-
-    // Methods generated from ${halData.document}:
-    ${halData.document.includes('SCPI') ? `
-    async measureVoltage() {
-        return this.query('MEAS:VOLT?');
-    }
-
-    async measureCurrent() {
-        return this.query('MEAS:CURR?');
-    }` : ''}
-    ${halData.document.includes('IVI') ? `
-    async configure(parameter: string, value: number) {
-        return this.write(\`CONF:\${parameter} \${value}\`);
-    }
-
-    async measure(parameter: string) {
-        return this.query(\`MEAS:\${parameter}?\`);
-    }` : ''}
-}`;
+                const result = await generateHal(
+                    halData.document || halData.uploadedFile?.name || 'Unknown',
+                    halData.technology
+                );
 
                 setHalData(prev => ({
                     ...prev,
                     isGenerated: true,
-                    generatedPreview: generatedCode,
+                    generatedPreview: result.abstract_class,
                     previewType: 'generated'
                 }));
             } else {
-                const preview = `// Generated Driver for ${driverData.file?.name}
-// Technology: ${driverData.technology}
-// Selected Functions:
-${driverData.functions.map(f => `// - ${f}`).join('\n')}
+                const result = await generateDriver({
+                    instrumentName: driverData.instrumentType,
+                    modelName: driverData.modelName,
+                    functions: driverData.functions,
+                    stack: driverData.technology,
+                    manual: driverData.file || undefined
+                });
 
-class InstrumentDriver {
-    constructor() {
-        this.connected = false;
-    }
-
-    ${driverData.functions.join('\n\n    ')}
-}`;
                 setDriverData(prev => ({
                     ...prev,
                     isGenerated: true,
-                    previewContent: preview
+                    previewContent: result.driver,
+                    abstractPreview: result.abstractClass
                 }));
             }
 
             toast.success(`${activeTab === 'hal' ? 'HAL' : 'Driver'} generated successfully!`);
         } catch (error) {
+            console.error('Error generating code:', error);
             toast.error('Failed to generate code');
         } finally {
             setIsGenerating(false);
+        }
+    };
+
+    const handleAddToLibrary = async () => {
+        try {
+            if (activeTab === 'hal') {
+                if (!halData.generatedPreview) {
+                    toast.error('No HAL code to add to library');
+                    return;
+                }
+
+                const success = await addHalToLibrary(
+                    halData.document || halData.uploadedFile?.name || 'Unknown',
+                    halData.generatedPreview
+                );
+
+                if (success) {
+                    toast.success('HAL added to library successfully');
+                } else {
+                    toast.error('Failed to add HAL to library');
+                }
+            } else {
+                if (!driverData.previewContent) {
+                    toast.error('No driver code to add to library');
+                    return;
+                }
+
+                const success = await addDriverToLibrary({
+                    instrumentName: driverData.instrumentType,
+                    modelName: driverData.modelName,
+                    driver: driverData.previewContent
+                });
+
+                if (success) {
+                    toast.success('Driver added to library successfully');
+                } else {
+                    toast.error('Failed to add driver to library');
+                }
+            }
+        } catch (error) {
+            console.error('Error adding to library:', error);
+            toast.error('Failed to add to library');
+        }
+    };
+
+    const handleDownload = async () => {
+        try {
+            if (activeTab === 'hal') {
+                if (!halData.generatedPreview) {
+                    toast.error('No HAL code to download');
+                    return;
+                }
+
+                const blob = await downloadHal(
+                    halData.document || halData.uploadedFile?.name || 'Unknown',
+                    halData.generatedPreview
+                );
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `HAL_${halData.document || 'Unknown'}.py`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                toast.success('HAL downloaded successfully');
+            } else {
+                if (!driverData.previewContent) {
+                    toast.error('No driver code to download');
+                    return;
+                }
+
+                const blob = await downloadDriver({
+                    instrumentName: driverData.instrumentType,
+                    modelName: driverData.modelName,
+                    driver: driverData.previewContent
+                });
+
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${driverData.modelName}_Driver.py`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                toast.success('Driver downloaded successfully');
+            }
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            toast.error('Failed to download file');
+        }
+    };
+
+    const handleDownloadApi = async () => {
+        if (!halData.generatedPreview) {
+            toast.error('No API code to download');
+            return;
+        }
+
+        try {
+            const blob = await downloadApi(
+                halData.document || halData.uploadedFile?.name || 'Unknown',
+                halData.generatedPreview
+            );
+
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `API_${halData.document || 'Unknown'}.py`;
+            a.click();
+            URL.revokeObjectURL(url);
+
+            toast.success('API downloaded successfully');
+        } catch (error) {
+            console.error('Error downloading API:', error);
+            toast.error('Failed to download API');
         }
     };
 
@@ -460,7 +575,7 @@ class InstrumentDriver {
                                     className="w-full p-2 border rounded-md focus:ring-2 focus:ring-primary-500"
                                 >
                                     <option value="">Choose technology...</option>
-                                    {technologies.map(tech => (
+                                    {techStacks.map(tech => (
                                         <option key={tech} value={tech}>{tech}</option>
                                     ))}
                                 </select>
@@ -655,6 +770,7 @@ class InstrumentDriver {
                                     variant="outline"
                                     className="flex-1"
                                     disabled={activeTab === 'hal' ? !halData.isGenerated : !driverData.isGenerated}
+                                    onClick={handleAddToLibrary}
                                 >
                                     <Library className="h-4 w-4 mr-2" />
                                     Add to Library
@@ -663,6 +779,7 @@ class InstrumentDriver {
                                     variant="outline"
                                     className="flex-1"
                                     disabled={activeTab === 'hal' ? !halData.isGenerated : !driverData.isGenerated}
+                                    onClick={handleDownload}
                                 >
                                     <Download className="h-4 w-4 mr-2" />
                                     Download {activeTab === 'hal' ? 'HAL' : 'Driver'}
@@ -672,6 +789,7 @@ class InstrumentDriver {
                                         variant="outline"
                                         className="flex-1"
                                         disabled={!halData.isGenerated}
+                                        onClick={handleDownloadApi}
                                     >
                                         <Download className="h-4 w-4 mr-2" />
                                         Download API
