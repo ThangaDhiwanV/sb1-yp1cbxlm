@@ -3,11 +3,67 @@ import { delay } from '../utils/delay';
 
 const BASE_URL = config.apiBaseUrl;
 
+// Mock data for HAL API responses
+const mockHalData = {
+  techStacks: ['PyVISA', 'Serial', 'SCPI'],
+  halDocs: ['Multimeter', 'Oscilloscope', 'PowerSupply'],
+  mockGeneratedCode: (instrumentName: string) => ({
+    abstract_class: `from abc import ABC, abstractmethod
+
+class ${instrumentName}HAL(ABC):
+    """Base class for ${instrumentName} instruments."""
+
+    @abstractmethod
+    def initialize(self) -> bool:
+        """Initialize the instrument.
+        Returns:
+            bool: True if initialization successful, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def reset(self) -> None:
+        """Reset the instrument to default state."""
+        pass
+
+    @abstractmethod
+    def self_test(self) -> tuple[bool, str]:
+        """Run instrument self-test.
+        Returns:
+            tuple[bool, str]: (passed, message)
+        """
+        pass
+
+    @abstractmethod
+    def close(self) -> None:
+        """Close connection to instrument."""
+        pass`,
+    api: `class ${instrumentName}API:
+    def __init__(self):
+        self.hal = ${instrumentName}HAL()
+        self.initialized = False
+
+    def initialize(self) -> bool:
+        if not self.initialized:
+            self.initialized = self.hal.initialize()
+        return self.initialized
+
+    def reset(self) -> None:
+        if self.initialized:
+            self.hal.reset()
+
+    def close(self) -> None:
+        if self.initialized:
+            self.hal.close()
+            self.initialized = False`
+  })
+};
+
 // Get available technology stacks
 export const getTechStacks = async (): Promise<string[]> => {
   if (config.mockApi) {
     await delay(300);
-    return ['PyVISA', 'Serial', 'SCPI'];
+    return mockHalData.techStacks;
   }
 
   try {
@@ -27,7 +83,7 @@ export const getTechStacks = async (): Promise<string[]> => {
 export const getHalDocs = async (): Promise<string[]> => {
   if (config.mockApi) {
     await delay(300);
-    return ['Multimeter', 'Oscilloscope', 'PowerSupply'];
+    return mockHalData.halDocs;
   }
 
   try {
@@ -47,10 +103,7 @@ export const getHalDocs = async (): Promise<string[]> => {
 export const generateHal = async (instrumentName: string, stack: string) => {
   if (config.mockApi) {
     await delay(500);
-    return {
-      abstract_class: `# Generated HAL for ${instrumentName}\nclass ${instrumentName}HAL:\n    def __init__(self):\n        self.initialized = False\n\n    def initialize(self) -> bool:\n        self.initialized = True\n        return True`,
-      api: `# Generated API for ${instrumentName}\nclass ${instrumentName}API:\n    def __init__(self):\n        self.hal = ${instrumentName}HAL()\n\n    def initialize(self) -> bool:\n        return self.hal.initialize()`
-    };
+    return mockHalData.mockGeneratedCode(instrumentName);
   }
 
   try {
