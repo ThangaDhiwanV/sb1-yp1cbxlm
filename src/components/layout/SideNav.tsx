@@ -1,10 +1,8 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, FolderTree, Microscope, Database, Boxes, User, Sparkles } from 'lucide-react';
+import { Home, FolderTree, Microscope, Database, Boxes, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
-import Button from '../common/Button';
-import { useCreationContext } from '../../App';
 
 const navItems = [
     { id: 'project', label: 'Project', icon: Home, path: '/project' },
@@ -18,7 +16,6 @@ const SideNav: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const userName = "JOHN DOE";
-    const { setIsCreationSliderOpen } = useCreationContext();
 
     return (
         <>
@@ -28,49 +25,14 @@ const SideNav: React.FC = () => {
                 "flex items-center justify-between px-6",
                 "bg-gradient-to-r from-white to-gray-50"
             )}>
-                <div className="flex items-center gap-8">
-                    <h1 className={cn(
-                        "text-xl font-bold tracking-tight",
-                        "bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent"
-                    )}>
-                        Instrument 360
-                    </h1>
-
-                    <Button
-                        variant="gradient"
-                        onClick={() => setIsCreationSliderOpen(true)}
-                        className={cn(
-                            "relative overflow-hidden",
-                            "group",
-                            "animate-fade-in"
-                        )}
-                    >
-                        <span className="flex items-center gap-2">
-                            <Sparkles className={cn(
-                                "h-5 w-5 transition-transform duration-300",
-                                "group-hover:scale-110 group-hover:rotate-12"
-                            )} />
-                            <span className="relative">
-                                Create HAL/Driver
-                                <span className={cn(
-                                    "absolute inset-x-0 bottom-0 h-0.5",
-                                    "bg-white/40 scale-x-0 group-hover:scale-x-100",
-                                    "transition-transform duration-300 origin-left"
-                                )} />
-                            </span>
-                        </span>
-                        <div className={cn(
-                            "absolute inset-0 -z-10",
-                            "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))]",
-                            "from-white/20 via-transparent to-transparent",
-                            "opacity-0 group-hover:opacity-100",
-                            "transition-opacity duration-300",
-                            "pointer-events-none"
-                        )} />
-                    </Button>
-                </div>
+                <h1 className={cn(
+                    "text-xl font-bold tracking-tight",
+                    "bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent"
+                )}>
+                    Instrument 360
+                </h1>
                 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center">
                     <button
                         className={cn(
                             "flex items-center gap-3 px-4 py-2 rounded-xl",
