@@ -4,11 +4,8 @@ import ModelsGrid from '../components/ModelsGrid/ModelsGrid';
 import { getInstrumentById } from '../api/instrumentService';
 import { getModelsByInstrumentId } from '../api/modelService';
 import { Model, Instrument } from '../types';
-import Breadcrumbs from '../components/common/Breadcrumbs';
 import { debounce } from '../utils/debounce';
-import Button from '../components/common/Button';
-import { Wrench } from 'lucide-react';
-import { useCreationContext } from '../App';
+import PageHeader from '../components/common/PageHeader';
 
 const Models: React.FC = () => {
     const { instrumentId } = useParams<{ instrumentId: string }>();
@@ -18,7 +15,6 @@ const Models: React.FC = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [searchQuery, setSearchQuery] = useState('');
-    const { setIsCreationSliderOpen } = useCreationContext();
     const [selectedInstrument, setSelectedInstrument] = useState<Instrument | null>(null);
 
     const fetchData = useCallback(async () => {
@@ -82,18 +78,11 @@ const Models: React.FC = () => {
 
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="mb-8">
-                <div className="flex justify-between items-center">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <Button
-                        onClick={() => setIsCreationSliderOpen(true)}
-                        className="flex items-center gap-2"
-                    >
-                        <Wrench className="h-4 w-4" />
-                        Create HAL/Driver
-                    </Button>
-                </div>
-            </div>
+            <PageHeader
+                title={selectedInstrument ? `${selectedInstrument.name} Models` : 'Models'}
+                description="Browse and manage instrument models"
+                breadcrumbs={breadcrumbItems}
+            />
 
             {error ? (
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
