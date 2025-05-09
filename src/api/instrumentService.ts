@@ -24,32 +24,29 @@ const setCache = <T>(key: string, data: T, map: Map<string, { data: T; timestamp
   map.set(key, { data, timestamp: Date.now() });
 };
 
-// Transform API response to frontend model
-const transformInstrumentData = (name: string, data: any): Instrument => ({
-  id: name,
-  name,
-  type: name,
-  driverCount: data.no_of_drivers || 0,
-  hasAbstractClass: data.hal || false,
-  hasDocs: data.docs || false,
-  hasSoftPanel: data.soft_panel || false,
-  hasApi: data.api || false,
-  documentation: data.documentation || false
-});
-
 export const getInstruments = async (params: PaginationParams): Promise<PaginatedResponse<Instrument>> => {
   try {
     if (config.mockApi) {
       await delay(300);
       let filteredInstruments = [...mockInstruments];
 
+      // Apply search filter
       if (params.search) {
         const searchLower = params.search.toLowerCase();
         filteredInstruments = filteredInstruments.filter(inst =>
-          inst.name.toLowerCase().includes(searchLower)
+          inst.name.toLowerCase().includes(searchLower) ||
+          inst.type.toLowerCase().includes(searchLower)
         );
       }
 
+      // Apply type filter
+      if (params.type) {
+        filteredInstruments = filteredInstruments.filter(inst =>
+          inst.type.toLowerCase() === params.type?.toLowerCase()
+        );
+      }
+
+      // Apply sorting
       if (params.sortBy) {
         filteredInstruments.sort((a: any, b: any) => {
           const aVal = a[params.sortBy!];
@@ -72,7 +69,17 @@ export const getInstruments = async (params: PaginationParams): Promise<Paginate
       };
     }
 
-    const response = await fetch(`${BASE_URL}/instruments`, {
+    // Real API integration
+    const queryParams = new URLSearchParams({
+      page: params.page.toString(),
+      pageSize: params.pageSize.toString(),
+      ...(params.search && { search: params.search }),
+      ...(params.type && { type: params.type }),
+      ...(params.sortBy && { sortBy: params.sortBy }),
+      ...(params.sortOrder && { sortOrder: params.sortOrder })
+    });
+
+    const response = await fetch(`${BASE_URL}/instruments?${queryParams}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
