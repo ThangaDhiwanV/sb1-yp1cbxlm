@@ -1,14 +1,14 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Box, Code, Database } from 'lucide-react';
+import { LayoutDashboard, Database, Code2, Boxes, Settings } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
 
 const navItems = [
-    { id: 'project', label: 'Project', icon: Home, path: '/' },
+    { id: 'project', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { id: 'macrobs', label: 'Macros', icon: Database, path: '/macrobs' },
-    { id: 'vc', label: 'VB', icon: Code, path: '/vc' },
-    { id: 'instruments', label: 'All Instruments', icon: Box, path: '/instruments' },
+    { id: 'vc', label: 'Version Control', icon: Code2, path: '/vc' },
+    { id: 'instruments', label: 'Instruments', icon: Boxes, path: '/instruments' },
 ];
 
 const SideNav: React.FC = () => {
@@ -17,56 +17,90 @@ const SideNav: React.FC = () => {
 
     return (
         <>
-            {/* Full-width Title Bar */}
-            <header className="fixed top-0 left-0 right-0 h-14 bg-white border-b border-gray-200 shadow-sm flex items-center justify-between px-6 z-30">
-                <h1 className="text-xl font-bold text-primary-600 tracking-wide">
-                    INSTRUMENT <span className="text-primary-500">360</span>
+            {/* Title Bar */}
+            <header className={cn(
+                "fixed top-0 left-0 right-0 h-14 z-30",
+                "bg-white border-b border-gray-200",
+                "flex items-center justify-between px-6",
+                "bg-gradient-to-r from-white to-gray-50"
+            )}>
+                <h1 className={cn(
+                    "text-xl font-bold tracking-tight",
+                    "bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent"
+                )}>
+                    Instrument Hub
                 </h1>
-                <Tooltip content="Pal" placement="left">
-                    <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 font-medium cursor-pointer hover:bg-primary-200 transition-colors">
-                        P
-                    </div>
+                <Tooltip content="Settings" placement="left">
+                    <button
+                        onClick={() => navigate('/settings')}
+                        className={cn(
+                            "p-2 rounded-lg transition-all duration-200",
+                            "hover:bg-gray-100 active:bg-gray-200",
+                            "focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                        )}
+                    >
+                        <Settings className="w-5 h-5 text-gray-600" />
+                    </button>
                 </Tooltip>
             </header>
 
-            {/* Side Navigation - Start below header */}
-            <div className="w-16 bg-white border-r border-gray-200/60 fixed left-0 top-14 bottom-0 flex flex-col items-center py-4 shadow-sm z-20">
-                {/* Navigation Items */}
-                <nav className="flex-1 w-full">
+            {/* Side Navigation */}
+            <nav className={cn(
+                "w-16 fixed left-0 top-14 bottom-0 z-20",
+                "bg-white border-r border-gray-200",
+                "flex flex-col items-center py-4",
+                "shadow-[1px_0_5px_0_rgba(0,0,0,0.05)]"
+            )}>
+                <div className="flex-1 w-full">
                     <ul className="space-y-2 px-2">
-                        {navItems.map((item) => (
-                            <li key={item.id}>
-                                <Tooltip content={item.label} placement="right">
-                                    <button
-                                        onClick={() => navigate(item.path)}
-                                        className={cn(
-                                            'w-full flex items-center justify-center p-2 rounded-lg group',
-                                            'transition-all duration-200 ease-in-out',
-                                            location.pathname === item.path
-                                                ? 'bg-primary-100 text-primary-600 shadow-sm'
-                                                : 'text-gray-600 hover:bg-gray-100 hover:text-gray-800'
-                                        )}
-                                    >
-                                        <item.icon
+                        {navItems.map((item) => {
+                            const isActive = location.pathname === item.path;
+                            
+                            return (
+                                <li key={item.id}>
+                                    <Tooltip content={item.label} placement="right">
+                                        <button
+                                            onClick={() => navigate(item.path)}
                                             className={cn(
-                                                'w-5 h-5 transition-colors',
-                                                location.pathname === item.path
-                                                    ? 'text-primary-500'
-                                                    : 'text-gray-400 group-hover:text-gray-600'
+                                                "w-full p-2.5 rounded-lg",
+                                                "transition-all duration-200",
+                                                "group relative",
+                                                "hover:bg-primary-50/80",
+                                                "active:bg-primary-100/80",
+                                                "focus:outline-none focus:ring-2 focus:ring-primary-500/20",
+                                                isActive && cn(
+                                                    "bg-primary-50",
+                                                    "before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2",
+                                                    "before:w-0.5 before:h-5 before:bg-primary-500",
+                                                    "before:rounded-r-full"
+                                                )
                                             )}
-                                        />
-                                    </button>
-                                </Tooltip>
-                            </li>
-                        ))}
+                                        >
+                                            <item.icon className={cn(
+                                                "w-5 h-5 mx-auto",
+                                                "transition-colors duration-200",
+                                                isActive
+                                                    ? "text-primary-600"
+                                                    : "text-gray-500 group-hover:text-primary-500"
+                                            )} />
+                                        </button>
+                                    </Tooltip>
+                                </li>
+                            );
+                        })}
                     </ul>
-                </nav>
+                </div>
 
                 {/* Version Tag */}
-                <div className="text-[10px] text-gray-400 mt-auto py-2">
+                <div className={cn(
+                    "px-3 py-2 mt-auto",
+                    "text-[10px] font-medium",
+                    "text-gray-400",
+                    "bg-gradient-to-t from-gray-50/50"
+                )}>
                     v1.0.0
                 </div>
-            </div>
+            </nav>
         </>
     );
 };
