@@ -6,7 +6,8 @@ import { ExplorerResponse } from '../types';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import Button from '../components/common/Button';
 import { useCreationContext } from '../App';
-import { getExplorerData, getFileContent, saveFileContent } from '../api/instrumentService';
+import { getFileContent, saveFileContent } from '../api/instrumentService';
+import { getExplorerData } from '../api';
 import FileEditor from '../components/InstrumentDetail/FileEditor';
 import { toast } from 'sonner';
 
