@@ -1,15 +1,15 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FolderTree, Home, Boxes, Database, Microscope, Settings, User } from 'lucide-react';
+import { Home, FolderTree, Microscope, Database, Boxes, User } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
 
 const navItems = [
-    { id: 'explorer', label: 'Explorer', icon: FolderTree, path: '/' },
     { id: 'project', label: 'Project', icon: Home, path: '/project' },
-    { id: 'instruments', label: 'Instruments', icon: Boxes, path: '/instruments' },
-    { id: 'macros', label: 'Macros', icon: Database, path: '/macros' },
+    { id: 'explorer', label: 'Explorer', icon: FolderTree, path: '/explorer' },
     { id: 'virtual-bench', label: 'Virtual Bench', icon: Microscope, path: '/virtual-bench' },
+    { id: 'macros', label: 'Macros', icon: Database, path: '/macros' },
+    { id: 'instruments', label: 'Instruments', icon: Boxes, path: '/instruments' },
 ];
 
 const SideNav: React.FC = () => {
@@ -32,24 +32,28 @@ const SideNav: React.FC = () => {
                     Instrument 360
                 </h1>
                 
-                <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 px-3 py-1.5 bg-gray-50 rounded-lg border border-gray-200">
-                        <User className="w-4 h-4 text-gray-500" />
-                        <span className="text-sm font-medium text-gray-700">{userName}</span>
-                    </div>
-                    <Tooltip content="Settings" placement="left">
-                        <button
-                            onClick={() => navigate('/settings')}
-                            className={cn(
-                                "p-2 rounded-lg transition-all duration-200",
-                                "text-gray-600 hover:text-primary-600",
-                                "hover:bg-primary-50",
-                                "focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                            )}
-                        >
-                            <Settings className="w-5 h-5" />
-                        </button>
-                    </Tooltip>
+                <div className="flex items-center">
+                    <button
+                        className={cn(
+                            "flex items-center gap-2 px-4 py-2 rounded-lg",
+                            "bg-gradient-to-r from-gray-50 to-gray-100",
+                            "border border-gray-200",
+                            "hover:from-gray-100 hover:to-gray-200",
+                            "transition-all duration-200",
+                            "group"
+                        )}
+                    >
+                        <div className={cn(
+                            "w-8 h-8 rounded-full",
+                            "bg-gradient-to-br from-primary-100 to-primary-200",
+                            "flex items-center justify-center",
+                            "group-hover:from-primary-200 group-hover:to-primary-300",
+                            "transition-all duration-200"
+                        )}>
+                            <User className="w-4 h-4 text-primary-600" />
+                        </div>
+                        <span className="font-medium text-gray-700">{userName}</span>
+                    </button>
                 </div>
             </header>
 
@@ -71,10 +75,10 @@ const SideNav: React.FC = () => {
                                             onClick={() => navigate(item.path)}
                                             className={cn(
                                                 "w-full p-2.5 rounded-lg",
-                                                "transition-all duration-200",
+                                                "transition-all duration-300",
                                                 "group relative",
-                                                "hover:bg-primary-50 hover:text-primary-600",
-                                                "active:bg-primary-100",
+                                                "hover:bg-primary-50/80 hover:text-primary-600",
+                                                "active:bg-primary-100/80",
                                                 "focus:outline-none focus:ring-2 focus:ring-primary-500/20",
                                                 isActive && cn(
                                                     "bg-primary-50 text-primary-600",
@@ -86,11 +90,21 @@ const SideNav: React.FC = () => {
                                         >
                                             <item.icon className={cn(
                                                 "w-5 h-5 mx-auto",
-                                                "transition-colors duration-200",
+                                                "transition-colors duration-300",
                                                 isActive
                                                     ? "text-primary-600"
                                                     : "text-gray-500 group-hover:text-primary-500"
                                             )} />
+                                            <div className={cn(
+                                                "absolute left-full ml-2 px-2 py-1",
+                                                "bg-gray-900 text-white text-xs rounded",
+                                                "opacity-0 pointer-events-none",
+                                                "group-hover:opacity-100",
+                                                "transition-all duration-200",
+                                                "whitespace-nowrap z-20"
+                                            )}>
+                                                {item.label}
+                                            </div>
                                         </button>
                                     </Tooltip>
                                 </li>
