@@ -57,16 +57,29 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
   const uniqueTypes = Array.from(new Set(instruments.map(inst => inst.type))).sort();
 
   return (
-    <div className="space-y-4"> {/* Reduced spacing */}
-      <div className="flex items-center gap-3 bg-white p-3 rounded-lg shadow-sm"> {/* Reduced padding and gap */}
+    <div className="space-y-4">
+      <div className={cn(
+        'flex items-center justify-between gap-4',
+        'bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50',
+        'p-4 rounded-xl',
+        'border-2 border-primary-200/30',
+        'shadow-lg shadow-primary-100/20'
+      )}>
         {/* Search */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 max-w-md">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Search className="h-4 w-4 text-gray-500" />
+            <Search className="h-4 w-4 text-primary-500" />
           </div>
           <input
             type="text"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2"
+            className={cn(
+              "block w-full pl-10 pr-3 py-2 text-sm",
+              "rounded-lg",
+              "bg-white border border-primary-200/60",
+              "text-gray-900 placeholder:text-gray-500",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+              "transition-all duration-200"
+            )}
             placeholder="Search instruments..."
             value={searchQuery}
             onChange={(e) => onSearch(e.target.value)}
@@ -74,12 +87,19 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
         </div>
 
         {/* Filter */}
-        <div className="relative w-[150px]">
+        <div className="relative w-[200px]">
           <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-            <Filter className="h-4 w-4 text-gray-500" />
+            <Filter className="h-4 w-4 text-primary-500" />
           </div>
           <select
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full pl-10 p-2"
+            className={cn(
+              "block w-full pl-10 pr-3 py-2 text-sm",
+              "rounded-lg",
+              "bg-white border border-primary-200/60",
+              "text-gray-900",
+              "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+              "transition-all duration-200"
+            )}
             onChange={(e) => onFilterChange(e.target.value)}
             defaultValue=""
           >
@@ -92,7 +112,14 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
 
         {/* Sort */}
         <select
-          className="w-[150px] bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block p-2"
+          className={cn(
+            "w-[200px]",
+            "px-3 py-2 text-sm rounded-lg",
+            "bg-white border border-primary-200/60",
+            "text-gray-900",
+            "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+            "transition-all duration-200"
+          )}
           onChange={(e) => handleSort(e.target.value)}
           value={sortBy || ''}
         >
@@ -108,6 +135,11 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
             size="sm"
             onClick={() => onPageChange(currentPage - 1)}
             disabled={currentPage <= 1 || loading}
+            className={cn(
+              "min-w-[32px] h-8",
+              "border-primary-200/60 hover:border-primary-300/60",
+              "hover:bg-primary-50"
+            )}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -116,7 +148,13 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
               type="text"
               value={customPage}
               onChange={handleCustomPageChange}
-              className="w-14 p-1.5 text-sm border border-gray-300 rounded-md text-center"
+              className={cn(
+                "w-14 py-1.5 px-2 text-sm text-center",
+                "rounded-lg",
+                "bg-white border border-primary-200/60",
+                "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+                "transition-all duration-200"
+              )}
               aria-label="Page number"
             />
             <span className="text-sm text-gray-600">/ {totalPages}</span>
@@ -126,6 +164,11 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
             size="sm"
             onClick={() => onPageChange(currentPage + 1)}
             disabled={currentPage >= totalPages || loading}
+            className={cn(
+              "min-w-[32px] h-8",
+              "border-primary-200/60 hover:border-primary-300/60",
+              "hover:bg-primary-50"
+            )}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -133,15 +176,32 @@ const InstrumentGrid: React.FC<InstrumentGridProps> = ({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"> {/* Reduced gap */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {instruments.map((instrument) => (
           <InstrumentCard key={instrument.id} instrument={instrument} />
         ))}
       </div>
 
       {instruments.length === 0 && !loading && (
-        <div className="text-center py-8"> {/* Reduced padding */}
-          <p className="text-gray-500">No instruments found</p>
+        <div className={cn(
+          "flex flex-col items-center justify-center py-8 rounded-xl",
+          "bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50",
+          "border-2 border-primary-200/30",
+          "shadow-lg shadow-primary-100/20"
+        )}>
+          <p className="text-gray-600 text-sm mb-1">No instruments found</p>
+          <p className="text-gray-500 text-xs">Try adjusting your search criteria</p>
+        </div>
+      )}
+
+      {loading && (
+        <div className={cn(
+          "flex items-center justify-center py-8 rounded-xl",
+          "bg-gradient-to-br from-white via-primary-50/30 to-secondary-100/50",
+          "border-2 border-primary-200/30",
+          "shadow-lg shadow-primary-100/20"
+        )}>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary-500 border-t-transparent" />
         </div>
       )}
     </div>
