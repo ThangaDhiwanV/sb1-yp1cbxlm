@@ -50,12 +50,12 @@ const Instruments: React.FC = () => {
 
     const debouncedSearch = debounce((query: string) => {
         setSearchQuery(query);
-        setCurrentPage(1); // Reset to first page on search
+        setCurrentPage(1);
     }, 300);
 
     const handleFilterChange = (type: string) => {
         setFilterType(type);
-        setCurrentPage(1); // Reset to first page on filter change
+        setCurrentPage(1);
     };
 
     const handleSort = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
@@ -64,7 +64,7 @@ const Instruments: React.FC = () => {
     };
 
     const breadcrumbItems = [
-        { label: 'Project', href: '/' },
+        { label: 'Project', href: '/project' },
         { label: 'All Instruments' }
     ];
 

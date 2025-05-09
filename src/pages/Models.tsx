@@ -71,7 +71,7 @@ const Models: React.FC = () => {
     }, 300);
 
     const breadcrumbItems = [
-        { label: 'Project', href: '/' },
+        { label: 'Project', href: '/project' },
         { label: 'All Instruments', href: '/instruments' },
         {
             label: selectedInstrument

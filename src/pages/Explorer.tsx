@@ -213,7 +213,7 @@ const Explorer: React.FC = () => {
     };
 
     const breadcrumbItems = [
-        { label: 'Project', href: '/' },
+        { label: 'Project', href: '/project' },
         { label: 'Explorer' }
     ];
 
