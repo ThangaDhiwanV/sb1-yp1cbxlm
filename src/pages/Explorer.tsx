@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { FileSearch } from 'lucide-react';
+import { Wrench, Edit2, Download, Search } from 'lucide-react';
 import { TreeView, TreeNode } from '../components/common/TreeView';
 import { ExplorerResponse } from '../types';
+import Breadcrumbs from '../components/common/Breadcrumbs';
+import Button from '../components/common/Button';
+import { useCreationContext } from '../App';
 import { getFileContent, saveFileContent } from '../api/instrumentService';
 import { getExplorerData } from '../api';
 import FileEditor from '../components/InstrumentDetail/FileEditor';
 import { toast } from 'sonner';
-import PageHeader from '../components/common/PageHeader';
+import { cn } from '../utils/cn';
 
 interface LocationState {
     fileType: 'hal' | 'api' | 'documentation' | 'panel';
@@ -27,6 +30,7 @@ const Explorer: React.FC = () => {
     const [fileContent, setFileContent] = useState<string>('');
     const [fileLoading, setFileLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
+    const { setIsCreationSliderOpen } = useCreationContext();
     const [searchQuery, setSearchQuery] = useState('');
 
     useEffect(() => {
@@ -191,29 +195,61 @@ const Explorer: React.FC = () => {
         }
     };
 
+    const handleDownload = () => {
+        if (!selectedNode || !fileContent) return;
+        try {
+            const blob = new Blob([fileContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = selectedNode.label + (getFileType(selectedNode.id) === 'hal' ? '.py' : '.txt');
+            a.click();
+            URL.revokeObjectURL(url);
+            toast.success('File downloaded successfully');
+        } catch (error) {
+            console.error('Error downloading file:', error);
+            toast.error('Failed to download file');
+        }
+    };
+
     const breadcrumbItems = [
         { label: 'Project', href: '/project' },
         { label: 'Explorer' }
     ];
 
     return (
-        <div className="flex flex-col h-screen">
-            <PageHeader
-                title="Explorer"
-                description="Browse and manage instrument files"
-                breadcrumbs={breadcrumbItems}
-            />
+        <div className="flex flex-col h-screen bg-gray-50">
+            <div className="flex-none border-b border-gray-200 bg-white">
+                <div className="max-w-screen-2xl mx-auto px-4 py-2">
+                    <div className="flex justify-between items-center">
+                        <Breadcrumbs items={breadcrumbItems} />
+                        <Button
+                            onClick={() => setIsCreationSliderOpen(true)}
+                            size="sm"
+                            className="flex items-center gap-2"
+                        >
+                            <Wrench className="h-4 w-4" />
+                            Create HAL/Driver
+                        </Button>
+                    </div>
+                </div>
+            </div>
 
             <div className="flex flex-1 overflow-hidden max-w-screen-2xl mx-auto w-full p-4 gap-4">
                 <div className="w-72 flex-shrink-0 flex flex-col gap-2">
                     <div className="relative">
-                        <FileSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <input
                             type="text"
                             placeholder="Search files..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full pl-9 pr-3 py-1.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500 placeholder:text-gray-400 text-sm"
+                            className={cn(
+                                "w-full pl-9 pr-3 py-1.5 rounded-lg",
+                                "border border-gray-200",
+                                "focus:outline-none focus:ring-2 focus:ring-primary-500/20 focus:border-primary-500",
+                                "placeholder:text-gray-400 text-sm"
+                            )}
                         />
                     </div>
                     
@@ -248,6 +284,28 @@ const Explorer: React.FC = () => {
                         <div className="h-full flex flex-col">
                             <div className="flex items-center justify-between px-3 py-2 border-b bg-gray-50/50">
                                 <span className="text-sm font-medium text-gray-700">{selectedNode.label}</span>
+                                {selectedNode.type === 'file' && !selectedNode.error && (
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            onClick={() => setIsEditing(true)}
+                                            size="sm"
+                                            variant="outline"
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <Edit2 className="h-3.5 w-3.5" />
+                                            Edit
+                                        </Button>
+                                        <Button
+                                            onClick={handleDownload}
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex items-center gap-1.5"
+                                        >
+                                            <Download className="h-3.5 w-3.5" />
+                                            Download
+                                        </Button>
+                                    </div>
+                                )}
                             </div>
                             <FileEditor
                                 content={fileContent}

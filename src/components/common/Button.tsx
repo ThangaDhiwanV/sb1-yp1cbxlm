@@ -3,7 +3,7 @@ import { cn } from '../../utils/cn';
 
 interface ButtonProps {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient' | 'create';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'gradient';
   size?: 'sm' | 'md' | 'lg';
   onClick?: () => void;
   className?: string;
@@ -59,17 +59,6 @@ const Button: React.FC<ButtonProps> = ({
       'hover:scale-[1.02] active:scale-[0.98]',
       'group'
     ),
-    create: cn(
-      'relative overflow-hidden',
-      'bg-gradient-to-r from-primary-500 via-secondary-500 to-primary-500',
-      'bg-[length:200%_100%]',
-      'text-white font-medium',
-      'shadow-lg shadow-primary-500/20',
-      'border border-white/20',
-      'hover:bg-[length:100%_100%] hover:scale-105',
-      'active:scale-95',
-      'group transition-all duration-300'
-    ),
   };
 
   const sizeClasses = {
@@ -91,19 +80,14 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       disabled={disabled}
     >
-      {Icon && <Icon className={cn(
-        "h-4 w-4",
-        variant === 'create' && "transition-transform duration-300 group-hover:rotate-180"
-      )} />}
+      {Icon && <Icon className="h-4 w-4" />}
       {children}
-      {(variant === 'gradient' || variant === 'create') && (
+      {variant === 'gradient' && (
         <div className={cn(
-          "absolute inset-0 -z-10",
-          "bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))]",
-          "from-white/20 via-transparent to-transparent",
-          "opacity-0 group-hover:opacity-100",
-          "transition-opacity duration-300",
-          "pointer-events-none"
+          "absolute inset-0",
+          "bg-gradient-to-r from-transparent via-white/20 to-transparent",
+          "translate-x-[-100%] group-hover:translate-x-[100%]",
+          "transition-transform duration-1000"
         )} />
       )}
     </button>
