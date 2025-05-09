@@ -1,13 +1,13 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Database, Code2, Boxes, Settings } from 'lucide-react';
+import { LayoutDashboard, Database, Microscope, Boxes, Settings } from 'lucide-react';
 import { cn } from '../../utils/cn';
 import Tooltip from '../common/Tooltip';
 
 const navItems = [
     { id: 'project', label: 'Dashboard', icon: LayoutDashboard, path: '/' },
     { id: 'macrobs', label: 'Macros', icon: Database, path: '/macrobs' },
-    { id: 'vc', label: 'Version Control', icon: Code2, path: '/vc' },
+    { id: 'vb', label: 'Virtual Bench', icon: Microscope, path: '/vb' },
     { id: 'instruments', label: 'Instruments', icon: Boxes, path: '/instruments' },
 ];
 
