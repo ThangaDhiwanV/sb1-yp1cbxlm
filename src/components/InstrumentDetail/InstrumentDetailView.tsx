@@ -5,7 +5,9 @@ import TreeNav from './TreeNav';
 import { Instrument, Model, HalApi, FileItem, ExplorerResponse } from '../../types';
 import { toast } from 'sonner';
 import ErrorBoundary from '../common/ErrorBoundary';
-import { getModelsByInstrumentId, getHalApiByInstrumentId, getFileContent } from '../../api/instrumentService';
+import { getFileContent } from '../../api/instrumentService';
+import { getModelsByInstrumentId } from '../../api/modelService';
+import { getHalApiByInstrumentId } from '../../api/halService';
 
 interface InstrumentDetailViewProps {
   instrument?: Instrument | null;
