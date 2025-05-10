@@ -3,13 +3,14 @@ import { useParams } from 'react-router-dom';
 import ModelsGrid from '../components/ModelsGrid/ModelsGrid';
 import { getInstrumentById } from '../api/instrumentService';
 import { getModelsByInstrumentId } from '../api/modelService';
-import { Model, Instrument } from '../types';
+import { Model, Instrument, PaginatedResponse } from '../types';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { debounce } from '../utils/debounce';
 import Button from '../components/common/Button';
 import { Wrench } from 'lucide-react';
 import { useCreationContext } from '../App';
 import { toast } from 'sonner';
+import { config } from '../api/config';
 
 const Models: React.FC = () => {
     const { instrumentId } = useParams<{ instrumentId: string }>();
@@ -29,19 +30,34 @@ const Models: React.FC = () => {
             return;
         }
 
-        try {
-            setLoading(true);
-            setError(null);
+        // If we're already loading, don't start another fetch
+        if (loading) {
+            return;
+        }
 
-            // Fetch instrument and models data in parallel
+        setLoading(true);
+        setError(null);
+
+        try {
+            // Log API URLs and configuration for debugging
+            console.log('API Configuration:', {
+                mockApi: config.mockApi,
+                baseUrl: config.apiBaseUrl
+            });
+            console.log('Fetching instrument:', `${config.apiBaseUrl}/instruments/${instrumentId}`);
+            console.log('Fetching models:', `${config.apiBaseUrl}/instruments/${instrumentId}/models`);
+
+            // Fetch instrument and models data in parallel with proper error handling
             const [instrument, modelData] = await Promise.all([
                 getInstrumentById(instrumentId).catch(error => {
                     console.error('Error fetching instrument:', error);
-                    throw new Error('Failed to fetch instrument details');
+                    toast.error('Failed to fetch instrument details');
+                    throw error;
                 }),
                 getModelsByInstrumentId(instrumentId).catch(error => {
                     console.error('Error fetching models:', error);
-                    throw new Error('Failed to fetch models');
+                    toast.error('Failed to fetch models');
+                    throw error;
                 })
             ]);
 
@@ -49,40 +65,22 @@ const Models: React.FC = () => {
                 throw new Error('Instrument not found');
             }
 
+            console.log('Instrument data:', instrument);
+            console.log('Model data:', modelData);
+
             setSelectedInstrument(instrument);
+            setModels(modelData.data || []);
+            setTotalPages(modelData.totalPages);
+            setCurrentPage(modelData.page);
 
-            // Ensure modelData is an array
-            const modelArray = Array.isArray(modelData) ? modelData : [];
-            
-            // Filter models based on search query
-            let filteredModels = modelArray;
-            if (searchQuery) {
-                const searchLower = searchQuery.toLowerCase();
-                filteredModels = filteredModels.filter(model =>
-                    model.name.toLowerCase().includes(searchLower)
-                );
-            }
-
-            // Handle pagination
-            const pageSize = 9;
-            const total = filteredModels.length;
-            const totalPages = Math.ceil(total / pageSize);
-            const start = (currentPage - 1) * pageSize;
-            const end = start + pageSize;
-
-            setModels(filteredModels.slice(start, end));
-            setTotalPages(Math.max(1, totalPages));
-        } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch models';
+        } catch (err: any) {
+            const errorMessage = err?.message || 'Failed to load data. Please try again.';
             setError(errorMessage);
-            toast.error(errorMessage);
-            console.error('Error fetching data:', err);
-            setModels([]);
-            setTotalPages(1);
+            console.error('Error:', err);
         } finally {
             setLoading(false);
         }
-    }, [instrumentId, currentPage, searchQuery]);
+    }, [instrumentId, loading]);
 
     useEffect(() => {
         fetchData();
@@ -90,32 +88,38 @@ const Models: React.FC = () => {
 
     const debouncedSearch = debounce((query: string) => {
         setSearchQuery(query);
-        setCurrentPage(1);
     }, 300);
-
-    const breadcrumbItems = [
-        { label: 'Project', href: '/project' },
-        { label: 'All Instruments', href: '/instruments' },
-        {
-            label: selectedInstrument
-                ? `${selectedInstrument.name} Models`
-                : 'Models'
-        }
-    ];
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
                 <div className="flex justify-between items-center">
-                    <Breadcrumbs items={breadcrumbItems} />
-                    <Button
-                        onClick={() => setIsCreationSliderOpen(true)}
-                        className="flex items-center gap-2"
-                        isCreationButton
-                    >
-                        <Wrench className="h-4 w-4" />
-                        Create HAL/Driver
-                    </Button>
+                    <Breadcrumbs
+                        items={[
+                            { label: 'Project', href: '/project' },
+                            { label: 'All Instruments', href: '/instruments' },
+                            {
+                                label: loading
+                                    ? 'Loading...'
+                                    : selectedInstrument
+                                        ? `${selectedInstrument.name} Models`
+                                        : 'Models',
+                                href: loading || !selectedInstrument
+                                    ? undefined
+                                    : `/instruments/${selectedInstrument.id}/models`
+                            }
+                        ]}
+                    />
+                    {!error && (
+                        <Button
+                            onClick={() => setIsCreationSliderOpen(true)}
+                            className="flex items-center gap-2"
+                            isCreationButton
+                        >
+                            <Wrench className="h-4 w-4" />
+                            Create HAL/Driver
+                        </Button>
+                    )}
                 </div>
             </div>
 
