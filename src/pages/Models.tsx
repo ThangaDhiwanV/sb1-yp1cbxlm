@@ -51,8 +51,11 @@ const Models: React.FC = () => {
 
             setSelectedInstrument(instrument);
 
+            // Ensure modelData is an array and handle filtering
+            const modelArray = Array.isArray(modelData) ? modelData : [];
+            
             // Filter models based on search query
-            let filteredModels = modelData || [];
+            let filteredModels = modelArray;
             if (searchQuery) {
                 const searchLower = searchQuery.toLowerCase();
                 filteredModels = filteredModels.filter(model =>
@@ -75,6 +78,7 @@ const Models: React.FC = () => {
             toast.error(errorMessage);
             console.error('Error fetching data:', err);
             setModels([]);
+            setTotalPages(1);
         } finally {
             setLoading(false);
         }
