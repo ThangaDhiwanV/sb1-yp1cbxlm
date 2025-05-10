@@ -1,13 +1,12 @@
 import { Model, FileItem } from '../types';
 import { config } from './config';
-import { delay } from '../utils/delay';
 
 const BASE_URL = config.apiBaseUrl;
 
 // Cache storage
 const cache = {
-  models: new Map<string, { data: any; timestamp: number }>(),
-  files: new Map<string, { data: any; timestamp: number }>()
+  models: new Map<string, { data: Model[]; timestamp: number }>(),
+  files: new Map<string, { data: FileItem; timestamp: number }>()
 };
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -32,14 +31,34 @@ export const getModelsByInstrumentId = async (instrumentId: string): Promise<Mod
   const cached = getCached(instrumentId, cache.models);
   if (cached) return cached;
 
-  try {
-    const response = await fetch(`${BASE_URL}/instruments/${instrumentId}/models`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
+  if (config.mockApi) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const mockModels: Model[] = [
+      {
+        id: 'm1',
+        name: 'Model A',
+        instrumentId,
+        status: 'active',
+        lastUpdated: new Date().toISOString(),
+        createdDate: new Date().toISOString(),
+        files: []
+      },
+      {
+        id: 'm2',
+        name: 'Model B',
+        instrumentId,
+        status: 'offline',
+        lastUpdated: new Date().toISOString(),
+        createdDate: new Date().toISOString(),
+        files: []
       }
-    });
+    ];
+    setCache(instrumentId, mockModels, cache.models);
+    return mockModels;
+  }
 
+  try {
+    const response = await fetch(`${BASE_URL}/instruments/${instrumentId}/models`);
     if (!response.ok) {
       throw new Error(`Failed to fetch models: ${response.statusText}`);
     }
@@ -59,6 +78,11 @@ export const openModelPanel = async (instrumentId: string, modelId: string): Pro
     throw new Error('Both Instrument ID and Model ID are required');
   }
 
+  if (config.mockApi) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/instruments/${instrumentId}/models/${modelId}/panel`, {
       method: 'POST',
@@ -66,7 +90,6 @@ export const openModelPanel = async (instrumentId: string, modelId: string): Pro
         'Content-Type': 'application/json'
       }
     });
-
     return response.ok;
   } catch (error) {
     console.error('Error opening model panel:', error);
@@ -82,14 +105,24 @@ export const getFileContent = async (fileId: string): Promise<FileItem | undefin
   const cached = getCached(fileId, cache.files);
   if (cached) return cached;
 
-  try {
-    const response = await fetch(`${BASE_URL}/files/${fileId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+  if (config.mockApi) {
+    await new Promise(resolve => setTimeout(resolve, 300));
+    const mockFile: FileItem = {
+      id: fileId,
+      name: 'Mock File',
+      type: 'driver',
+      content: '// Mock file content\nfunction mockFunction() {\n  return true;\n}',
+      lastModified: new Date().toISOString(),
+      author: 'System',
+      version: '1.0.0',
+      allowedActions: ['edit', 'download', 'view']
+    };
+    setCache(fileId, mockFile, cache.files);
+    return mockFile;
+  }
 
+  try {
+    const response = await fetch(`${BASE_URL}/files/${fileId}`);
     if (!response.ok) {
       throw new Error(`Failed to fetch file content: ${response.statusText}`);
     }
@@ -108,6 +141,11 @@ export const saveFileContent = async (fileId: string, content: string): Promise<
     throw new Error('File ID is required');
   }
 
+  if (config.mockApi) {
+    await new Promise(resolve => setTimeout(resolve, 500));
+    return true;
+  }
+
   try {
     const response = await fetch(`${BASE_URL}/files/${fileId}`, {
       method: 'PUT',
@@ -118,7 +156,6 @@ export const saveFileContent = async (fileId: string, content: string): Promise<
     });
 
     if (response.ok) {
-      // Update cache if save was successful
       const fileData = await response.json();
       setCache(fileId, fileData, cache.files);
     }

@@ -51,7 +51,7 @@ const Models: React.FC = () => {
 
             setSelectedInstrument(instrument);
 
-            // Ensure modelData is an array and handle filtering
+            // Ensure modelData is an array
             const modelArray = Array.isArray(modelData) ? modelData : [];
             
             // Filter models based on search query
