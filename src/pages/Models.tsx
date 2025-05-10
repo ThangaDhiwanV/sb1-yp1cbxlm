@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import ModelsGrid from '../components/ModelsGrid/ModelsGrid';
 import { getInstrumentById } from '../api/instrumentService';
 import { getModelsByInstrumentId } from '../api/modelService';
-import { Model, Instrument, PaginatedResponse } from '../types';
+import { Model, Instrument } from '../types';
 import Breadcrumbs from '../components/common/Breadcrumbs';
 import { debounce } from '../utils/debounce';
 import Button from '../components/common/Button';
@@ -30,46 +30,22 @@ const Models: React.FC = () => {
             return;
         }
 
-        // If we're already loading, don't start another fetch
-        if (loading) {
-            return;
-        }
-
-        setLoading(true);
-        setError(null);
-
         try {
-            // Log API URLs and configuration for debugging
-            console.log('API Configuration:', {
-                mockApi: config.mockApi,
-                baseUrl: config.apiBaseUrl
-            });
-            console.log('Fetching instrument:', `${config.apiBaseUrl}/instruments/${instrumentId}`);
-            console.log('Fetching models:', `${config.apiBaseUrl}/instruments/${instrumentId}/models`);
+            setLoading(true);
+            setError(null);
 
-            // Fetch instrument and models data in parallel with proper error handling
+            // Fetch instrument and models data in parallel
             const [instrument, modelData] = await Promise.all([
-                getInstrumentById(instrumentId).catch(error => {
-                    console.error('Error fetching instrument:', error);
-                    toast.error('Failed to fetch instrument details');
-                    throw error;
-                }),
-                getModelsByInstrumentId(instrumentId).catch(error => {
-                    console.error('Error fetching models:', error);
-                    toast.error('Failed to fetch models');
-                    throw error;
-                })
+                getInstrumentById(instrumentId),
+                getModelsByInstrumentId(instrumentId)
             ]);
 
             if (!instrument) {
                 throw new Error('Instrument not found');
             }
 
-            console.log('Instrument data:', instrument);
-            console.log('Model data:', modelData);
-
             setSelectedInstrument(instrument);
-            setModels(modelData.data || []);
+            setModels(modelData.data);
             setTotalPages(modelData.totalPages);
             setCurrentPage(modelData.page);
 
@@ -77,10 +53,11 @@ const Models: React.FC = () => {
             const errorMessage = err?.message || 'Failed to load data. Please try again.';
             setError(errorMessage);
             console.error('Error:', err);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
-    }, [instrumentId, loading]);
+    }, [instrumentId]);
 
     useEffect(() => {
         fetchData();
@@ -88,28 +65,24 @@ const Models: React.FC = () => {
 
     const debouncedSearch = debounce((query: string) => {
         setSearchQuery(query);
+        setCurrentPage(1);
     }, 300);
+
+    const breadcrumbItems = [
+        { label: 'Project', href: '/project' },
+        { label: 'All Instruments', href: '/instruments' },
+        {
+            label: selectedInstrument
+                ? `${selectedInstrument.name} Models`
+                : 'Models'
+        }
+    ];
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-8">
                 <div className="flex justify-between items-center">
-                    <Breadcrumbs
-                        items={[
-                            { label: 'Project', href: '/project' },
-                            { label: 'All Instruments', href: '/instruments' },
-                            {
-                                label: loading
-                                    ? 'Loading...'
-                                    : selectedInstrument
-                                        ? `${selectedInstrument.name} Models`
-                                        : 'Models',
-                                href: loading || !selectedInstrument
-                                    ? undefined
-                                    : `/instruments/${selectedInstrument.id}/models`
-                            }
-                        ]}
-                    />
+                    <Breadcrumbs items={breadcrumbItems} />
                     {!error && (
                         <Button
                             onClick={() => setIsCreationSliderOpen(true)}
