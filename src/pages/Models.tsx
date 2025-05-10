@@ -35,8 +35,14 @@ const Models: React.FC = () => {
 
             // Fetch instrument and models data in parallel
             const [instrument, modelData] = await Promise.all([
-                getInstrumentById(instrumentId),
-                getModelsByInstrumentId(instrumentId)
+                getInstrumentById(instrumentId).catch(error => {
+                    console.error('Error fetching instrument:', error);
+                    throw new Error('Failed to fetch instrument details');
+                }),
+                getModelsByInstrumentId(instrumentId).catch(error => {
+                    console.error('Error fetching models:', error);
+                    throw new Error('Failed to fetch models');
+                })
             ]);
 
             if (!instrument) {
@@ -46,7 +52,7 @@ const Models: React.FC = () => {
             setSelectedInstrument(instrument);
 
             // Filter models based on search query
-            let filteredModels = modelData;
+            let filteredModels = modelData || [];
             if (searchQuery) {
                 const searchLower = searchQuery.toLowerCase();
                 filteredModels = filteredModels.filter(model =>
@@ -62,12 +68,13 @@ const Models: React.FC = () => {
             const end = start + pageSize;
 
             setModels(filteredModels.slice(start, end));
-            setTotalPages(totalPages);
+            setTotalPages(Math.max(1, totalPages));
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'Failed to fetch models';
             setError(errorMessage);
             toast.error(errorMessage);
             console.error('Error fetching data:', err);
+            setModels([]);
         } finally {
             setLoading(false);
         }
