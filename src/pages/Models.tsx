@@ -9,6 +9,7 @@ import { debounce } from '../utils/debounce';
 import Button from '../components/common/Button';
 import { Wrench } from 'lucide-react';
 import { useCreationContext } from '../App';
+import { toast } from 'sonner';
 
 const Models: React.FC = () => {
     const { instrumentId } = useParams<{ instrumentId: string }>();
@@ -22,21 +23,30 @@ const Models: React.FC = () => {
     const [selectedInstrument, setSelectedInstrument] = useState<Instrument | null>(null);
 
     const fetchData = useCallback(async () => {
-        if (!instrumentId) return;
+        if (!instrumentId) {
+            setError('No instrument ID provided');
+            setLoading(false);
+            return;
+        }
 
         try {
             setLoading(true);
+            setError(null);
+
+            // Fetch instrument and models data in parallel
             const [instrument, modelData] = await Promise.all([
                 getInstrumentById(instrumentId),
                 getModelsByInstrumentId(instrumentId)
             ]);
 
-            if (instrument) {
-                setSelectedInstrument(instrument);
+            if (!instrument) {
+                throw new Error('Instrument not found');
             }
 
-            let filteredModels = [...modelData];
+            setSelectedInstrument(instrument);
 
+            // Filter models based on search query
+            let filteredModels = modelData;
             if (searchQuery) {
                 const searchLower = searchQuery.toLowerCase();
                 filteredModels = filteredModels.filter(model =>
@@ -44,6 +54,7 @@ const Models: React.FC = () => {
                 );
             }
 
+            // Handle pagination
             const pageSize = 9;
             const total = filteredModels.length;
             const totalPages = Math.ceil(total / pageSize);
@@ -52,10 +63,11 @@ const Models: React.FC = () => {
 
             setModels(filteredModels.slice(start, end));
             setTotalPages(totalPages);
-            setError(null);
         } catch (err) {
-            setError('Failed to fetch models. Please try again later.');
-            console.error('Error fetching models:', err);
+            const errorMessage = err instanceof Error ? err.message : 'Failed to fetch models';
+            setError(errorMessage);
+            toast.error(errorMessage);
+            console.error('Error fetching data:', err);
         } finally {
             setLoading(false);
         }

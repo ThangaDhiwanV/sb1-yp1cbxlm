@@ -1,9 +1,8 @@
 import { Model, FileItem } from '../types';
 import { config } from './config';
-import { mockModels } from './mockData';
+import { delay } from '../utils/delay';
 
 const BASE_URL = config.apiBaseUrl;
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 // Cache storage
 const cache = {
@@ -26,24 +25,29 @@ const setCache = <T>(key: string, data: T, map: Map<string, { data: T; timestamp
 };
 
 export const getModelsByInstrumentId = async (instrumentId: string): Promise<Model[]> => {
+  if (!instrumentId) {
+    throw new Error('Instrument ID is required');
+  }
+
   const cached = getCached(instrumentId, cache.models);
   if (cached) return cached;
 
-  if (config.mockApi) {
-    await delay(300);
-    const models = mockModels.filter(model => model.instrumentId === instrumentId);
+  try {
+    const response = await fetch(`${BASE_URL}/instruments/${instrumentId}/models`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch models: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const models = Array.isArray(data) ? data : data.models || [];
     setCache(instrumentId, models, cache.models);
     return models;
-  }
-
-  try {
-    const response = await fetch(`${BASE_URL}/instruments/${instrumentId}/models`);
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
-    }
-    const data = await response.json();
-    setCache(instrumentId, data, cache.models);
-    return data;
   } catch (error) {
     console.error('Error fetching models:', error);
     throw error;
@@ -51,9 +55,8 @@ export const getModelsByInstrumentId = async (instrumentId: string): Promise<Mod
 };
 
 export const openModelPanel = async (instrumentId: string, modelId: string): Promise<boolean> => {
-  if (config.mockApi) {
-    await delay(500);
-    return true;
+  if (!instrumentId || !modelId) {
+    throw new Error('Both Instrument ID and Model ID are required');
   }
 
   try {
@@ -63,6 +66,7 @@ export const openModelPanel = async (instrumentId: string, modelId: string): Pro
         'Content-Type': 'application/json'
       }
     });
+
     return response.ok;
   } catch (error) {
     console.error('Error opening model panel:', error);
@@ -71,26 +75,25 @@ export const openModelPanel = async (instrumentId: string, modelId: string): Pro
 };
 
 export const getFileContent = async (fileId: string): Promise<FileItem | undefined> => {
+  if (!fileId) {
+    throw new Error('File ID is required');
+  }
+
   const cached = getCached(fileId, cache.files);
   if (cached) return cached;
 
-  if (config.mockApi) {
-    await delay(200);
-    for (const model of mockModels) {
-      const file = model.files.find(f => f.id === fileId);
-      if (file) {
-        setCache(fileId, file, cache.files);
-        return file;
-      }
-    }
-    return undefined;
-  }
-
   try {
-    const response = await fetch(`${BASE_URL}/files/${fileId}`);
+    const response = await fetch(`${BASE_URL}/files/${fileId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+      throw new Error(`Failed to fetch file content: ${response.statusText}`);
     }
+
     const data = await response.json();
     setCache(fileId, data, cache.files);
     return data;
@@ -101,9 +104,8 @@ export const getFileContent = async (fileId: string): Promise<FileItem | undefin
 };
 
 export const saveFileContent = async (fileId: string, content: string): Promise<boolean> => {
-  if (config.mockApi) {
-    await delay(400);
-    return true;
+  if (!fileId) {
+    throw new Error('File ID is required');
   }
 
   try {
@@ -114,6 +116,13 @@ export const saveFileContent = async (fileId: string, content: string): Promise<
       },
       body: JSON.stringify({ content })
     });
+
+    if (response.ok) {
+      // Update cache if save was successful
+      const fileData = await response.json();
+      setCache(fileId, fileData, cache.files);
+    }
+
     return response.ok;
   } catch (error) {
     console.error('Error saving file content:', error);
